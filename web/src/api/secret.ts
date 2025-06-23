@@ -5,7 +5,7 @@ import type {
   PostItemRequest,
   SecretItem,
 } from './types'
-import api from './config'
+import api from './http'
 
 /**
  * 信息项相关API

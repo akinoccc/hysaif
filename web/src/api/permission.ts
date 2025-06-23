@@ -2,7 +2,7 @@ import type {
   ApiMethod,
   ApiResponse,
 } from './types'
-import api from './config'
+import api from './http'
 
 // 权限相关类型定义
 export interface PermissionRequest {

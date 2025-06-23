@@ -8,7 +8,7 @@ import type {
   User,
   UserListParams,
 } from './types'
-import api from './config'
+import api from './http'
 
 /**
  * 用户相关API

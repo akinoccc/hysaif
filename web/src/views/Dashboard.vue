@@ -6,12 +6,11 @@ import {
   Eye,
   Shield,
 } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { auditAPI, type AuditLog, itemAPI, type SecretItem } from '@/api'
+import { type SecretItem, secretItemAPI } from '@/api'
 import { PermissionButton } from '@/components'
 import { Card } from '@/components/ui/card'
-import { AUDIT_LOG_ACTION_LIST, AUDIT_LOG_ACTION_MAP, AUDIT_LOG_RESOURCE_MAP } from '@/constants/auditLog'
 import { formatRelativeTime, getFileIcon } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
 
@@ -26,24 +25,11 @@ const stats = ref({
 })
 
 const recentItems = ref<SecretItem[]>([])
-const recentLogs = ref<AuditLog[]>([])
-
-const canViewAudit = computed(() => {
-  return authStore.user && authStore.user.role && ['super_admin', 'sec_mgr', 'auditor'].includes(authStore.user.role)
-})
-
-function getActionDisplayName(action: string) {
-  return AUDIT_LOG_ACTION_MAP[action as keyof typeof AUDIT_LOG_ACTION_MAP] || action
-}
-
-function getResourceDisplayName(resource: string) {
-  return AUDIT_LOG_RESOURCE_MAP[resource as keyof typeof AUDIT_LOG_RESOURCE_MAP] || resource
-}
 
 async function loadDashboardData() {
   try {
     // 加载信息项统计
-    const itemsResponse = await itemAPI.getItems({ page: 1, page_size: 5 })
+    const itemsResponse = await secretItemAPI.getItems({ page: 1, page_size: 5 })
     stats.value.totalItems = itemsResponse.pagination.total
     recentItems.value = itemsResponse.data || []
 
@@ -56,18 +42,6 @@ async function loadDashboardData() {
       const expiresAt = new Date(item.expires_at)
       return expiresAt <= thirtyDaysLater
     }).length
-
-    // 加载审计日志（如果有权限）
-    if (canViewAudit.value) {
-      const logsResponse = await auditAPI.getLogs({ page: 1, page_size: 5 })
-      recentLogs.value = logsResponse.data || []
-
-      // 计算今日访问次数
-      const today = new Date().toISOString().split('T')[0]
-      stats.value.todayAccess = recentLogs.value.filter((log: AuditLog) => {
-        return log.created_at.startsWith(today) && log.action === AUDIT_LOG_ACTION_LIST.Read
-      }).length
-    }
   }
   catch (error) {
     console.error('Failed to load dashboard data:', error)

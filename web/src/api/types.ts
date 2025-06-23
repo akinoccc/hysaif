@@ -50,15 +50,6 @@ export interface LoginRequest {
   password: string
 }
 
-export interface WeWorkAuthRequest {
-  code: string
-  state?: string
-}
-
-export interface WeWorkAuthURLResponse {
-  auth_url: string
-}
-
 export interface LoginResponse {
   token: string
   user: User
@@ -270,32 +261,3 @@ export interface AccessRequestListParams extends PaginationParams {
 
 // API 方法返回类型
 export type ApiMethod<T = any> = Promise<T>
-
-// WebAuthn 相关类型
-export interface WebAuthnCredentialResponse {
-  id: string
-  name: string
-  created_at: string
-  last_used_at: string
-}
-
-export interface WebAuthnBeginRegistrationRequest {
-  credential_name: string
-}
-
-export interface WebAuthnBeginRegistrationResponse {
-  options: PublicKeyCredentialCreationOptions
-}
-
-export interface WebAuthnFinishRegistrationRequest {
-  response: any
-  credential_name: string
-}
-
-export interface WebAuthnBeginLoginResponse {
-  options: PublicKeyCredentialRequestOptions
-}
-
-export interface WebAuthnFinishLoginRequest {
-  response: any
-}

@@ -8,7 +8,7 @@ import type {
   RejectAccessRequestRequest,
   RevokeAccessRequestRequest,
 } from './types'
-import api from './config'
+import api from './http'
 
 /**
  * 访问申请相关API

@@ -1,7 +1,7 @@
 import type { Component } from 'vue'
 import type { ApiListResponse } from './types'
 import { AlertCircle, AlertTriangle, Bell, Clock, Info, UserCheck, UserPlus, UserX } from 'lucide-vue-next'
-import api from './config'
+import api from './http'
 
 // 通知相关类型定义
 export interface Notification {

@@ -16,7 +16,7 @@ import {
   User,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import { auditAPI, userAPI } from '@/api'
+import { userAPI } from '@/api'
 import PasskeyManager from '@/components/business/passkey-manager/PasskeyManager.vue'
 import { Button } from '@/components/ui/button'
 
@@ -134,12 +134,8 @@ async function changePassword() {
 async function loadLoginHistory() {
   loadingHistory.value = true
   try {
-    const response = await auditAPI.getLogs({
-      action: 'login',
-      user: user.value?.name,
-      page_size: 10,
-    })
-    loginHistory.value = response.data || []
+    // const response = await userAPI.getLoginHistory()
+    // loginHistory.value = response.data || []
   }
   catch (error) {
     console.error('Failed to load login history:', error)
