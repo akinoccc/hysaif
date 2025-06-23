@@ -8,7 +8,7 @@ import type {
   User,
   UserListParams,
 } from './types'
-import api from './http'
+import { api } from './http'
 
 /**
  * 用户相关API
@@ -86,5 +86,3 @@ export const userAPI = {
     return api.delete(`/users/${id}`)
   },
 }
-
-export default userAPI

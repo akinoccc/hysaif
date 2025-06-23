@@ -43,7 +43,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.ApiKey]: {
       title: 'API 密钥管理',
       description: '管理您的 API 密钥和访问凭据',
-      searchPlaceholder: 'API 密钥名称、描述或标签',
+      searchPlaceholder: 'API 密钥名称、描述',
       createButtonText: '新建 API 密钥',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.ApiKey].icon,
       emptyTitle: '暂无 API 密钥',
@@ -52,7 +52,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.Password]: {
       title: '密码管理',
       description: '管理您的网站、应用和系统密码',
-      searchPlaceholder: '密码名称、描述或标签',
+      searchPlaceholder: '密码名称、描述',
       createButtonText: '新建密码',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Password].icon,
       emptyTitle: '暂无密码',
@@ -61,7 +61,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.SshKey]: {
       title: 'SSH 密钥管理',
       description: '管理您的服务器和开发环境 SSH 密钥',
-      searchPlaceholder: 'SSH 密钥名称、描述或标签',
+      searchPlaceholder: 'SSH 密钥名称、描述',
       createButtonText: '新建 SSH 密钥',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.SshKey].icon,
       emptyTitle: '暂无 SSH 密钥',
@@ -70,7 +70,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.Token]: {
       title: '令牌管理',
       description: '管理您的访问令牌和认证凭据',
-      searchPlaceholder: '令牌名称、描述或标签',
+      searchPlaceholder: '令牌名称、描述',
       createButtonText: '新建令牌',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Token].icon,
       emptyTitle: '暂无令牌',
@@ -79,7 +79,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.AccessKey]: {
       title: '访问密钥管理',
       description: '管理您的云服务和平台访问密钥',
-      searchPlaceholder: '访问密钥名称、描述或标签',
+      searchPlaceholder: '访问密钥名称、描述',
       createButtonText: '新建访问密钥',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.AccessKey].icon,
       emptyTitle: '暂无访问密钥',
@@ -88,7 +88,7 @@ const typeInfo = computed(() => {
     [SECRET_ITEM_TYPE.Custom]: {
       title: '自定义密钥管理',
       description: '管理您的自定义密钥和配置',
-      searchPlaceholder: '自定义密钥名称、描述或标签',
+      searchPlaceholder: '自定义密钥名称、描述',
       createButtonText: '新建自定义密钥',
       emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Custom].icon,
       emptyTitle: '暂无自定义密钥',
@@ -164,11 +164,9 @@ const quickFilters = computed((): FilterField[] => [
     type: 'select',
     placeholder: '全部环境',
     options: [
-      { value: 'production', label: '生产环境' },
-      { value: 'staging', label: '测试环境' },
-      { value: 'development', label: '开发环境' },
-      { value: 'sandbox', label: '沙盒环境' },
-      { value: 'unspecified', label: '未指定' },
+      { value: 'prod', label: '生产环境' },
+      { value: 'test', label: '测试环境' },
+      { value: 'dev', label: '开发环境' },
     ],
   },
 ])
@@ -181,12 +179,12 @@ const advancedFilters = computed((): FilterField[] => [
     icon: ArrowUpDown,
     placeholder: '排序方式',
     options: [
-      { value: 'created_at_desc', label: '创建时间 ↓' },
-      { value: 'created_at_asc', label: '创建时间 ↑' },
-      { value: 'updated_at_desc', label: '更新时间 ↓' },
-      { value: 'updated_at_asc', label: '更新时间 ↑' },
-      { value: 'name_asc', label: '名称 A-Z' },
-      { value: 'name_desc', label: '名称 Z-A' },
+      { value: 'created_at desc', label: '创建时间 ↓' },
+      { value: 'created_at asc', label: '创建时间 ↑' },
+      { value: 'updated_at desc', label: '更新时间 ↓' },
+      { value: 'updated_at asc', label: '更新时间 ↑' },
+      { value: 'name asc', label: '名称 A-Z' },
+      { value: 'name desc', label: '名称 Z-A' },
     ],
   },
   {
@@ -239,7 +237,7 @@ const filterState = ref<FilterState>({
   searchCreator: undefined,
   dateRange: undefined,
   searchTags: undefined,
-  sortBy: 'created_at_desc',
+  sortBy: 'created_at desc',
 })
 
 // 计算属性
@@ -253,7 +251,7 @@ const filter = computed(() => {
     creator_name: filterState.value.searchCreator,
     created_at_from: filterState.value.dateRange?.[0],
     created_at_to: filterState.value.dateRange?.[1],
-    tags: filterState.value.searchTags ? filterState.value.searchTags.split(',').map(tag => tag.trim()).filter(Boolean) : undefined,
+    tag: filterState.value.searchTags,
     sort_by: filterState.value.sortBy,
     page: currentPage.value,
     page_size: Number.parseInt(pageSize.value.toString()),
@@ -295,7 +293,7 @@ function resetFilters() {
     searchCreator: undefined,
     dateRange: undefined,
     searchTags: undefined,
-    sortBy: 'created_at_desc',
+    sortBy: 'created_at desc',
   }
   currentPage.value = 1
 }

@@ -21,6 +21,15 @@ func GetSecretItems(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	category := c.Query("category")
 	itemType := c.Query("type")
+	status := c.Query("status")
+	environment := c.Query("environment")
+	search := c.Query("search")
+	tag := c.Query("tag")
+	creator := c.Query("creator_name")
+
+	createdAtFrom := c.Query("created_at_from")
+	createdAtTo := c.Query("created_at_to")
+	sortBy := c.Query("sort_by")
 
 	offset := (page - 1) * pageSize
 
@@ -31,6 +40,39 @@ func GetSecretItems(c *gin.Context) {
 	}
 	if itemType != "" {
 		query = query.Where("type = ?", itemType)
+	}
+	if status != "" {
+		switch status {
+		case "expired":
+			query = query.Where("expires_at < ?", time.Now().UnixMilli())
+		case "expiring":
+			query = query.Where("expires_at > ? AND expires_at < ?", time.Now().UnixMilli(), time.Now().AddDate(0, 0, 7).UnixMilli())
+		case "active":
+			query = query.Where("expires_at > ?", time.Now().UnixMilli())
+		}
+	}
+	if environment != "" {
+		query = query.Where("environment = ?", environment)
+	}
+	if search != "" {
+		query = query.Where("name LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	if tag != "" {
+		query = query.Where("tags LIKE %?%", tag)
+	}
+	if creator != "" {
+		userIDs := []string{}
+		models.DB.Model(&models.User{}).Where("name LIKE ?", "%"+creator+"%").Pluck("id", &userIDs)
+		query = query.Where("created_by IN (?)", userIDs)
+	}
+	if createdAtFrom != "" {
+		query = query.Where("created_at >= ?", createdAtFrom)
+	}
+	if createdAtTo != "" {
+		query = query.Where("created_at <= ?", createdAtTo)
+	}
+	if sortBy != "" {
+		query = query.Order(sortBy)
 	}
 
 	var total int64

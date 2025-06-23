@@ -187,7 +187,13 @@ export type PostItemRequest<D> = Omit<
 export interface ItemsListParams extends PaginationParams {
   category?: string
   search?: string
-  tags?: string
+  tag?: string
+  creator_name?: string
+  environment?: string
+  status?: string
+  created_at_from?: number
+  created_at_to?: number
+  sort_by?: string
   page_size?: number
 }
 
@@ -253,10 +259,13 @@ export interface RevokeAccessRequestRequest {
 
 export interface AccessRequestListParams extends PaginationParams {
   status?: string
-  applicant_id?: string
-  secret_item_id?: string
+  applicant_name?: string
+  secret_item_name?: string
   sort_by?: string
-  sort_desc?: boolean
+  created_at_from?: string
+  created_at_to?: string
+  page?: number
+  page_size?: number
 }
 
 // API 方法返回类型

@@ -80,8 +80,11 @@ func GetAccessRequests(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	status := c.Query("status")
-	applicantID := c.Query("applicant_id")
-	secretItemID := c.Query("secret_item_id")
+	applicantName := c.Query("applicant_name")
+	secretItemName := c.Query("secret_item_name")
+	createdAtFrom := c.Query("created_at_from")
+	createdAtTo := c.Query("created_at_to")
+	sortBy := c.Query("sort_by")
 
 	offset := (page - 1) * pageSize
 
@@ -98,11 +101,25 @@ func GetAccessRequests(c *gin.Context) {
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-	if applicantID != "" {
-		query = query.Where("applicant_id = ?", applicantID)
+	if applicantName != "" {
+		userIDs := []string{}
+		models.DB.Model(&models.User{}).Where("name LIKE ?", "%"+applicantName+"%").Pluck("id", &userIDs)
+		query = query.Where("applicant_id IN (?)", userIDs)
 	}
-	if secretItemID != "" {
-		query = query.Where("secret_item_id = ?", secretItemID)
+	if secretItemName != "" {
+		secretItemIDs := []string{}
+		models.DB.Model(&models.SecretItem{}).Where("name LIKE ?", "%"+secretItemName+"%").Pluck("id", &secretItemIDs)
+		query = query.Where("secret_item_id IN (?)", secretItemIDs)
+	}
+
+	if createdAtFrom != "" {
+		query = query.Where("created_at >= ?", createdAtFrom)
+	}
+	if createdAtTo != "" {
+		query = query.Where("created_at <= ?", createdAtTo)
+	}
+	if sortBy != "" {
+		query = query.Order(sortBy)
 	}
 
 	var total int64

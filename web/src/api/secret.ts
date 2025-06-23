@@ -5,7 +5,7 @@ import type {
   PostItemRequest,
   SecretItem,
 } from './types'
-import api from './http'
+import { api } from './http'
 
 /**
  * 信息项相关API
@@ -66,5 +66,3 @@ export const secretItemAPI = {
     return api.get(`/items/${id}/access`)
   },
 }
-
-export default secretItemAPI

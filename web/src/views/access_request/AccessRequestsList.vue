@@ -60,12 +60,12 @@ const advancedFilters = computed((): FilterField[] => [
     icon: ArrowUpDown,
     placeholder: '排序方式',
     options: [
-      { value: 'created_at_desc', label: '申请时间 ↓' },
-      { value: 'created_at_asc', label: '申请时间 ↑' },
-      { value: 'updated_at_desc', label: '更新时间 ↓' },
-      { value: 'updated_at_asc', label: '更新时间 ↑' },
-      { value: 'status_asc', label: '状态 A-Z' },
-      { value: 'status_desc', label: '状态 Z-A' },
+      { value: 'created_at desc', label: '申请时间 ↓' },
+      { value: 'created_at asc', label: '申请时间 ↑' },
+      { value: 'updated_at desc', label: '更新时间 ↓' },
+      { value: 'updated_at asc', label: '更新时间 ↑' },
+      { value: 'status asc', label: '状态 A-Z' },
+      { value: 'status desc', label: '状态 Z-A' },
     ],
   },
   {
@@ -106,7 +106,7 @@ const filterState = ref<FilterState>({
   selectedStatus: undefined,
   searchApplicant: undefined,
   dateRange: undefined,
-  sortBy: 'created_at_desc',
+  sortBy: 'created_at desc',
 })
 
 const filter = computed(() => {
@@ -154,7 +154,7 @@ function resetFilters() {
     selectedStatus: undefined,
     searchApplicant: undefined,
     dateRange: undefined,
-    sortBy: 'created_at_desc',
+    sortBy: 'created_at desc',
   }
   currentPage.value = 1
 }

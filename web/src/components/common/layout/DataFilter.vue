@@ -151,10 +151,10 @@ function removeFilter(key: string) {
       updateFilter(key as keyof T, undefined)
     }
     else if (field?.type === 'select') {
-      updateFilter(key as keyof T, 'all')
+      updateFilter(key as keyof T, undefined)
     }
     else {
-      updateFilter(key as keyof T, '')
+      updateFilter(key as keyof T, undefined)
     }
   }
 }

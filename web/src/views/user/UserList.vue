@@ -30,7 +30,7 @@ import UserSheet from './UserSheet.vue'
 const pageInfo = {
   title: '用户管理',
   description: '管理系统用户账户和权限',
-  searchPlaceholder: '用户名、姓名或邮箱',
+  searchPlaceholder: '用户名、邮箱',
   createButtonText: '新建用户',
   emptyIcon: Users,
   emptyTitle: '暂无用户',

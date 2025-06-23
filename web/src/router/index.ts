@@ -41,20 +41,6 @@ const router = createRouter({
           },
         },
         {
-          path: '/audit',
-          name: 'Audit',
-          component: () => import('@/views/audit/AuditLogs.vue'),
-          meta: {
-            requiresAuth: true,
-            roles: ['super_admin', 'sec_mgr', 'auditor'],
-            menu: {
-              title: '审计日志',
-              icon: FileText,
-              showInMenu: true,
-            },
-          },
-        },
-        {
           path: '/permission',
           name: 'PermissionManagement',
           component: () => import('@/views/permission/Permission.vue'),

@@ -21,6 +21,7 @@ type SecretItem struct {
 	Tags        []string        `json:"tags" gorm:"serializer:json"` // JSON格式的标签数组
 	Data        *SecretItemData `json:"data" gorm:"type:text"`       // 加密后的敏感数据
 	ExpiresAt   uint64          `json:"expires_at"`                  // 过期时间, 0表示永不过期
+	Environment string          `json:"environment"`                 // 环境：dev, test, prod
 	CreatedBy   string          `json:"created_by"`                  // 创建者ID
 	UpdatedBy   string          `json:"updated_by"`                  // 更新者ID
 
