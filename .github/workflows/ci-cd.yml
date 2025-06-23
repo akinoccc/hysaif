@@ -1,0 +1,381 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_API: ${{ github.repository }}/sims-api
+  IMAGE_NAME_WEB: ${{ github.repository }}/sims-web
+  # 阿里云 ACR 配置
+  ACR_REGISTRY: crpi-zrvyxuu9xturx8bi.cn-shenzhen.personal.cr.aliyuncs.com
+  ACR_NAMESPACE: akinoccc
+  ACR_IMAGE_NAME_API: sims-api
+  ACR_IMAGE_NAME_WEB: sims-web
+
+jobs:
+  # Go后端检查和测试
+  go-lint-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+
+    - name: 设置Go环境
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+        cache: true
+        cache-dependency-path: api/go.sum
+
+    - name: Go代码格式检查和测试
+      run: |
+        cd api
+        go fmt ./...
+        go vet ./...
+        go test -v ./...
+
+  # 前端检查和构建
+  web-lint-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+
+    - name: 设置Node.js环境
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: web/pnpm-lock.yaml
+
+    - name: 安装pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+        run_install: false
+
+    - name: 获取pnpm store目录
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: 设置pnpm缓存
+      uses: actions/cache@v4
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: 安装依赖
+      run: |
+        cd web
+        pnpm install --frozen-lockfile
+
+    - name: 并行执行前端检查和构建
+      run: |
+        cd web
+        pnpm run lint &
+        pnpm run typecheck &
+        pnpm run build &
+        wait
+
+  # 构建API Docker镜像
+  build-api:
+    needs: go-lint-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      api-image-digest: ${{ steps.build-api.outputs.digest }}
+
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 登录到阿里云 ACR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.ACR_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: 提取元数据（API）
+      id: meta-api
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/${{ env.ACR_IMAGE_NAME_API }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: 构建并推送API镜像
+      id: build-api
+      uses: docker/build-push-action@v5
+      with:
+        context: ./api
+        file: ./api/Dockerfile
+        push: true
+        tags: ${{ steps.meta-api.outputs.tags }}
+        labels: ${{ steps.meta-api.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+        provenance: false
+
+  # 构建Web Docker镜像
+  build-web:
+    needs: web-lint-build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      web-image-digest: ${{ steps.build-web.outputs.digest }}
+
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+
+    - name: 设置Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 登录到阿里云 ACR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.ACR_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: 提取元数据（Web）
+      id: meta-web
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/${{ env.ACR_IMAGE_NAME_WEB }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: 构建并推送Web镜像
+      id: build-web
+      uses: docker/build-push-action@v5
+      with:
+        context: ./web
+        file: ./web/Dockerfile
+        push: true
+        tags: ${{ steps.meta-web.outputs.tags }}
+        labels: ${{ steps.meta-web.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+        provenance: false
+
+  # 部署到生产环境
+  deploy:
+    needs: [build-api, build-web]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - name: Checkout代码
+      uses: actions/checkout@v4
+
+    - name: 复制配置文件到服务器
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        source: "docker-compose.prod.yml,nginx/nginx.prod.conf"
+        target: "/data/sims/"
+        strip_components: 0
+
+    - name: 部署到服务器
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          set -e
+
+          PROJECT_DIR="/data/sims"
+
+          # 创建项目目录
+          sudo mkdir -p $PROJECT_DIR
+          sudo chown -R $USER:$USER $PROJECT_DIR
+          cd $PROJECT_DIR
+          
+          # 创建nginx目录
+          mkdir -p nginx/ssl
+          
+          # 确保配置文件存在
+          if [ ! -f "docker-compose.prod.yml" ]; then
+            echo "错误：docker-compose.prod.yml文件不存在！"
+            exit 1
+          fi
+          
+          if [ ! -f "nginx/nginx.prod.conf" ]; then
+            echo "错误：nginx.prod.conf文件不存在！"
+            exit 1
+          fi
+
+          # 创建或更新.env文件
+          cat > .env << EOF
+          # Docker配置
+          DOCKER_REGISTRY=${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}
+          IMAGE_TAG=latest
+          
+          # 数据库配置
+          MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER=${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+          
+          # 应用配置
+          SIMS_ENCRYPTION_KEY=${{ secrets.SIMS_ENCRYPTION_KEY }}
+          SIMS_JWT_SECRET=${{ secrets.SIMS_JWT_SECRET }}
+          
+          # Redis配置
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          EOF
+          
+          # 创建API配置文件
+          cat > config.json << EOF
+          {
+            "database": {
+              "type": "mysql",
+              "host": "mysql",
+              "port": 3306,
+              "database": "${{ secrets.MYSQL_DATABASE }}",
+              "username": "${{ secrets.MYSQL_USER }}",
+              "password": "${{ secrets.MYSQL_PASSWORD }}"
+            },
+            "redis": {
+              "host": "redis",
+              "port": 6379,
+              "password": "${{ secrets.REDIS_PASSWORD }}",
+              "db": 0
+            },
+            "server": {
+              "port": 8080,
+              "host": "0.0.0.0"
+            },
+            "security": {
+              "encryption_key": "${{ secrets.SIMS_ENCRYPTION_KEY }}",
+              "jwt_secret": "${{ secrets.SIMS_JWT_SECRET }}"
+            }
+          }
+          EOF
+          
+          # 将配置文件复制到正确位置
+          mkdir -p /data/sims/api
+          mv -f config.json /data/sims/api/config.json
+          
+          # 登录到阿里云 ACR
+          echo "登录到阿里云 ACR..."
+          docker login ${{ env.ACR_REGISTRY }} -u "${{ secrets.ACR_USERNAME }}" -p "${{ secrets.ACR_PASSWORD }}"
+          
+          # 拉取最新镜像（并行）
+          echo "拉取最新镜像..."
+          docker pull ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/sims-api:latest &
+          docker pull ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/sims-web:latest &
+          wait
+          
+          # 停止旧容器
+          echo "停止旧容器..."
+          docker compose -f docker-compose.prod.yml down || true
+          
+          # 启动新容器
+          echo "启动新容器..."
+          docker compose -f docker-compose.prod.yml up -d
+          
+          # 等待服务启动（减少等待时间）
+          echo "等待服务启动..."
+          sleep 20
+          
+          # 健康检查（优化检查间隔）
+          echo "执行健康检查..."
+          max_attempts=6
+          attempt=1
+          
+          while [ $attempt -le $max_attempts ]; do
+            echo "健康检查尝试 $attempt/$max_attempts"
+            
+            if curl -f http://localhost/health > /dev/null 2>&1; then
+              echo "服务健康检查通过！"
+              break
+            fi
+            
+            if [ $attempt -eq $max_attempts ]; then
+              echo "健康检查失败，查看服务状态："
+              docker compose -f docker-compose.prod.yml ps
+              docker compose -f docker-compose.prod.yml logs --tail=50
+              exit 1
+            fi
+            
+            echo "健康检查失败，15秒后重试..."
+            sleep 15
+            attempt=$((attempt + 1))
+          done
+          
+          # 清理未使用的镜像
+          echo "清理未使用的镜像..."
+          docker image prune -f
+          
+          # 登出 ACR
+          docker logout ${{ env.ACR_REGISTRY }}
+          
+          echo "部署完成！"
+
+  # # 安全扫描（可选）
+  # security-scan:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   permissions:
+  #     security-events: write
+
+  #   steps:
+  #   - name: 运行Trivy漏洞扫描（API）
+  #     uses: aquasecurity/trivy-action@master
+  #     with:
+  #       image-ref: ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/sims-api:latest
+  #       format: 'sarif'
+  #       output: 'trivy-api-results.sarif'
+
+  #   - name: 运行Trivy漏洞扫描（Web）
+  #     uses: aquasecurity/trivy-action@master
+  #     with:
+  #       image-ref: ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/sims-web:latest
+  #       format: 'sarif'
+  #       output: 'trivy-web-results.sarif'
+
+  #   - name: 上传Trivy扫描结果（API）
+  #     uses: github/codeql-action/upload-sarif@v3
+  #     if: always()
+  #     with:
+  #       sarif_file: 'trivy-api-results.sarif'
+
+  #   - name: 上传Trivy扫描结果（Web）
+  #     uses: github/codeql-action/upload-sarif@v3
+  #     if: always()
+  #     with:
+  #       sarif_file: 'trivy-web-results.sarif'

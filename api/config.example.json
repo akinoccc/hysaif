@@ -1,0 +1,20 @@
+{
+  "database": {
+    "type": "sqlite",
+    "host": "localhost",
+    "port": 5432,
+    "name": "sims",
+    "user": "sims_user",
+    "password": "your_password_here",
+    "ssl_mode": "disable",
+    "path": "sims.db"
+  },
+  "security": {
+    "encryption_key": "32-byte-long-key-for-encryption!",
+    "jwt_secret": "your-jwt-secret-key-here"
+  },
+  "server": {
+    "port": 8080,
+    "host": "localhost"
+  }
+}
