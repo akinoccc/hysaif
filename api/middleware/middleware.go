@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/akinoccc/hysaif/api/internal/context"
 	"github.com/akinoccc/hysaif/api/models"
+	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/types"
 
 	"github.com/gin-gonic/gin"

@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/akinoccc/hysaif/api/internal/context"
-	"github.com/akinoccc/hysaif/api/internal/notification"
 	"github.com/akinoccc/hysaif/api/models"
+	"github.com/akinoccc/hysaif/api/packages/context"
+	"github.com/akinoccc/hysaif/api/packages/notification"
 	"github.com/akinoccc/hysaif/api/types"
 )
 

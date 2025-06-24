@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/akinoccc/hysaif/api/utils"
+	"github.com/akinoccc/hysaif/api/packages/crypto"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -80,7 +80,7 @@ func (s SecretItemData) Value() (driver.Value, error) {
 	}
 
 	// 加密JSON数据
-	encryptedData, err := utils.Encrypt(jsonData)
+	encryptedData, err := crypto.Encrypt(jsonData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt SecretItemData: %w", err)
 	}
@@ -111,7 +111,7 @@ func (s *SecretItemData) Scan(value interface{}) error {
 	}
 
 	// 解密数据
-	decryptedData, err := utils.Decrypt(encryptedData)
+	decryptedData, err := crypto.Decrypt(encryptedData)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt SecretItemData: %w", err)
 	}

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/akinoccc/hysaif/api/utils"
+	"github.com/akinoccc/hysaif/api/packages/permission"
 
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
@@ -97,7 +97,7 @@ func (u *User) HasPermission(resource, action string) bool {
 	}
 
 	// 使用Casbin检查权限
-	casbinManager := utils.GetCasbinManager(DB)
+	casbinManager := permission.GetCasbinManager(DB)
 	hasPermission := casbinManager.CheckPermission(u.Role, resource, action)
 
 	return hasPermission

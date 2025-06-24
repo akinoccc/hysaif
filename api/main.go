@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/akinoccc/hysaif/api/config"
-	"github.com/akinoccc/hysaif/api/internal/notification"
 	"github.com/akinoccc/hysaif/api/models"
+	"github.com/akinoccc/hysaif/api/packages/notification"
+	"github.com/akinoccc/hysaif/api/packages/permission"
 	"github.com/akinoccc/hysaif/api/router"
-	"github.com/akinoccc/hysaif/api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +24,7 @@ func main() {
 	models.InitDB()
 
 	// 初始化Casbin权限管理器
-	utils.GetCasbinManager(models.DB)
+	permission.GetCasbinManager(models.DB)
 
 	// 启动定时任务服务
 	notification.Start()

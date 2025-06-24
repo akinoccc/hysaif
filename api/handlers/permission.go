@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/akinoccc/hysaif/api/internal/context"
 	"github.com/akinoccc/hysaif/api/models"
-	"github.com/akinoccc/hysaif/api/utils"
+	"github.com/akinoccc/hysaif/api/packages/context"
+	"github.com/akinoccc/hysaif/api/packages/permission"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,7 +39,7 @@ func CheckPermission(c *gin.Context) {
 	}
 
 	// 检查指定权限
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	hasPermission := casbinManager.CheckPermission(user.Role, req.Resource, req.Action)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -61,7 +61,7 @@ func AddPolicy(c *gin.Context) {
 	}
 
 	// 添加权限策略
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.AddPolicy(req.Role, req.Resource, req.Action)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -87,7 +87,7 @@ func RemovePolicy(c *gin.Context) {
 	}
 
 	// 移除权限策略
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.RemovePolicy(req.Role, req.Resource, req.Action)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -107,7 +107,7 @@ func RemovePolicy(c *gin.Context) {
 // GetPolicies 获取所有权限策略
 func GetPolicies(c *gin.Context) {
 	// 获取所有权限策略
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	policies := casbinManager.GetPolicy()
 
 	c.JSON(http.StatusOK, gin.H{
@@ -132,7 +132,7 @@ func AddRoleForUser(c *gin.Context) {
 	}
 
 	// 为用户添加角色
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.AddRoleForUser(req.User, req.Role)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -157,7 +157,7 @@ func DeleteRoleForUser(c *gin.Context) {
 	}
 
 	// 删除用户角色
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.DeleteRoleForUser(req.User, req.Role)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -182,7 +182,7 @@ func GetRolesForUser(c *gin.Context) {
 	}
 
 	// 获取用户的所有角色
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	roles := casbinManager.GetRolesForUser(userParam)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -202,7 +202,7 @@ func GetUsersForRole(c *gin.Context) {
 	}
 
 	// 获取角色下的所有用户
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	users := casbinManager.GetUsersForRole(role)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -222,7 +222,7 @@ func GetPermissionsForRole(c *gin.Context) {
 	}
 
 	// 获取角色的所有权限
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	permissions := casbinManager.GetPermissionsForRole(role)
 
 	c.JSON(http.StatusOK, gin.H{
@@ -236,7 +236,7 @@ func GetPermissionsForRole(c *gin.Context) {
 // ReloadPolicy 重新加载权限策略
 func ReloadPolicy(c *gin.Context) {
 	// 重新加载权限策略
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.ReloadPolicy()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -274,7 +274,7 @@ func UpdateRolePermissions(c *gin.Context) {
 	}
 
 	// 批量更新角色权限
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 	err := casbinManager.UpdateRolePermissions(role, req.Permissions)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -307,7 +307,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 		return
 	}
 
-	casbinManager := utils.GetCasbinManager(models.DB)
+	casbinManager := permission.GetCasbinManager(models.DB)
 
 	// 定义所有可能的菜单项
 	allMenus := []MenuItemResponse{
