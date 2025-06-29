@@ -17,7 +17,6 @@ import {
 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { userAPI } from '@/api'
-import PasskeyManager from '@/components/business/passkey-manager/PasskeyManager.vue'
 import { Button } from '@/components/ui/button'
 
 import { Card } from '@/components/ui/card'
@@ -288,9 +287,6 @@ onMounted(() => {
             </form>
           </div>
         </Card>
-
-        <!-- Passkey 管理 -->
-        <PasskeyManager />
 
         <!-- 登录历史 -->
         <Card>

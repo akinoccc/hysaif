@@ -14,7 +14,7 @@ import {
   Terminal,
   Users,
 } from 'lucide-vue-next'
-import { onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { type MenuItemData, permissionAPI } from '@/api/permission'
 import { Button } from '@/components/ui/button'
