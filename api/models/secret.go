@@ -22,15 +22,15 @@ type SecretItem struct {
 	Data        *SecretItemData `json:"data" gorm:"type:text"`       // 加密后的敏感数据
 	ExpiresAt   uint64          `json:"expires_at"`                  // 过期时间, 0表示永不过期
 	Environment string          `json:"environment"`                 // 环境：dev, test, prod
-	CreatedBy   string          `json:"created_by"`                  // 创建者ID
-	UpdatedBy   string          `json:"updated_by"`                  // 更新者ID
+	CreatedByID string          `json:"-" gorm:"index"`              // 创建者ID
+	UpdatedByID string          `json:"-" gorm:"index"`              // 更新者ID
 
 	// 访问权限相关（不存储在数据库中）
 	HasApprovedAccess bool `json:"has_approved_access" gorm:"-"` // 是否有已批准的访问申请
 
-	// 关联
-	Creator User `json:"creator" gorm:"foreignKey:CreatedBy"`
-	Updater User `json:"updater" gorm:"foreignKey:UpdatedBy"`
+	// 关联用户
+	Creator User `json:"creator" gorm:"foreignKey:CreatedByID"`
+	Updater User `json:"updater" gorm:"foreignKey:UpdatedByID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

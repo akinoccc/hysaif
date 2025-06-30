@@ -7,10 +7,10 @@
  */
 export function isWebAuthnSupported(): boolean {
   return !!(
-    window.PublicKeyCredential
-    && navigator.credentials
-    && typeof navigator.credentials.create === 'function'
-    && typeof navigator.credentials.get === 'function'
+    navigator.credentials
+    && navigator.credentials.create
+    && navigator.credentials.get
+    && window.PublicKeyCredential
   )
 }
 
@@ -123,47 +123,78 @@ export function prepareLoginResponse(credential: PublicKeyCredential): any {
 /**
  * 创建 WebAuthn 凭证（注册）
  */
-export async function createCredential(options: PublicKeyCredentialCreationOptions): Promise<PublicKeyCredential> {
-  try {
-    const credential = await navigator.credentials.create({ publicKey: options })
-    if (!credential) {
-      throw new Error('创建凭证失败')
-    }
-    return credential as PublicKeyCredential
+export async function createCredential(options: any): Promise<any> {
+  // 解码 challenge
+  options.publicKey.challenge = base64URLStringToBuffer(options.publicKey.challenge)
+
+  // 解码 user.id
+  if (options.publicKey.user?.id) {
+    options.publicKey.user.id = base64URLStringToBuffer(options.publicKey.user.id)
   }
-  catch (error: any) {
-    console.log(error)
-    if (error.name === 'NotAllowedError') {
-      throw new Error('用户取消了操作或操作超时')
-    }
-    else if (error.name === 'InvalidStateError') {
-      throw new Error('该认证器已经注册过了')
-    }
-    else if (error.name === 'NotSupportedError') {
-      throw new Error('浏览器不支持该操作')
-    }
-    throw error
+
+  // 解码 excludeCredentials
+  if (options.publicKey.excludeCredentials) {
+    options.publicKey.excludeCredentials = options.publicKey.excludeCredentials.map((cred: any) => ({
+      ...cred,
+      id: base64URLStringToBuffer(cred.id),
+    }))
+  }
+
+  // 创建凭证
+  const credential = await navigator.credentials.create(options) as PublicKeyCredential
+
+  if (!credential) {
+    throw new Error('Failed to create credential')
+  }
+
+  const response = credential.response as AuthenticatorAttestationResponse
+
+  // 返回编码后的凭证
+  return {
+    id: credential.id,
+    rawId: bufferToBase64URLString(credential.rawId),
+    type: credential.type,
+    response: {
+      attestationObject: bufferToBase64URLString(response.attestationObject),
+      clientDataJSON: bufferToBase64URLString(response.clientDataJSON),
+    },
   }
 }
 
 /**
  * 获取 WebAuthn 凭证（登录）
  */
-export async function getCredential(options: PublicKeyCredentialRequestOptions): Promise<PublicKeyCredential> {
-  try {
-    const credential = await navigator.credentials.get({ publicKey: options })
-    if (!credential) {
-      throw new Error('获取凭证失败')
-    }
-    return credential as PublicKeyCredential
+export async function getCredential(options: any): Promise<any> {
+  // 解码 challenge
+  options.publicKey.challenge = base64URLStringToBuffer(options.publicKey.challenge)
+
+  // 解码 allowCredentials
+  if (options.publicKey.allowCredentials) {
+    options.publicKey.allowCredentials = options.publicKey.allowCredentials.map((cred: any) => ({
+      ...cred,
+      id: base64URLStringToBuffer(cred.id),
+    }))
   }
-  catch (error: any) {
-    if (error.name === 'NotAllowedError') {
-      throw new Error('用户取消了操作或操作超时')
-    }
-    else if (error.name === 'NotSupportedError') {
-      throw new Error('浏览器不支持该操作')
-    }
-    throw error
+
+  // 获取凭证
+  const credential = await navigator.credentials.get(options) as PublicKeyCredential
+
+  if (!credential) {
+    throw new Error('Failed to get credential')
+  }
+
+  const response = credential.response as AuthenticatorAssertionResponse
+
+  // 返回编码后的凭证
+  return {
+    id: credential.id,
+    rawId: bufferToBase64URLString(credential.rawId),
+    type: credential.type,
+    response: {
+      authenticatorData: bufferToBase64URLString(response.authenticatorData),
+      clientDataJSON: bufferToBase64URLString(response.clientDataJSON),
+      signature: bufferToBase64URLString(response.signature),
+      userHandle: response.userHandle ? bufferToBase64URLString(response.userHandle) : null,
+    },
   }
 }

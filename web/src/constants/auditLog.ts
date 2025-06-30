@@ -2,6 +2,8 @@ import { SECRET_ITEM_TYPE } from './secretItem'
 
 export const AUDIT_LOG_RESOURCE_LIST = {
   User: 'user',
+  AccessRequest: 'access_request',
+  Password: SECRET_ITEM_TYPE.Password,
   ApiKey: SECRET_ITEM_TYPE.ApiKey,
   AccessKey: SECRET_ITEM_TYPE.AccessKey,
   SshKey: SECRET_ITEM_TYPE.SshKey,
@@ -11,6 +13,8 @@ export const AUDIT_LOG_RESOURCE_LIST = {
 
 export const AUDIT_LOG_RESOURCE_MAP = {
   [AUDIT_LOG_RESOURCE_LIST.User]: '用户',
+  [AUDIT_LOG_RESOURCE_LIST.AccessRequest]: '访问申请',
+  [AUDIT_LOG_RESOURCE_LIST.Password]: '密码',
   [AUDIT_LOG_RESOURCE_LIST.ApiKey]: 'API密钥',
   [AUDIT_LOG_RESOURCE_LIST.AccessKey]: '访问密钥',
   [AUDIT_LOG_RESOURCE_LIST.SshKey]: 'SSH密钥',

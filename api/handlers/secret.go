@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/akinoccc/hysaif/api/middleware"
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/types"
@@ -116,6 +117,8 @@ func GetSecretItems(c *gin.Context) {
 		}
 	}
 
+	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(itemType))(c)
+
 	c.JSON(http.StatusOK, types.ListResponse[models.SecretItem]{
 		Data: items,
 		Pagination: types.Pagination{
@@ -145,8 +148,8 @@ func CreateSecretItem(c *gin.Context) {
 		Tags:        req.Tags,
 		Data:        &req.Data,
 		ExpiresAt:   req.ExpiresAt,
-		CreatedBy:   user.ID,
-		UpdatedBy:   user.ID,
+		CreatedByID: user.ID,
+		UpdatedByID: user.ID,
 	}
 
 	if err := models.DB.Create(&item).Error; err != nil {
@@ -156,6 +159,8 @@ func CreateSecretItem(c *gin.Context) {
 
 	// 重新查询以获取关联数据
 	models.DB.Preload("Creator").Preload("Updater").First(&item, "id = ?", item.ID)
+
+	middleware.AuditLog(types.AuditLogActionCreate, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusCreated, item)
 }
@@ -174,6 +179,8 @@ func GetSecretItem(c *gin.Context) {
 		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "信息项不存在"})
 		return
 	}
+
+	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusOK, item)
 }
@@ -205,7 +212,7 @@ func UpdateSecretItem(c *gin.Context) {
 	item.Tags = req.Tags
 	item.Data = &req.Data // 这里会触发自定义序列化器
 	item.ExpiresAt = req.ExpiresAt
-	item.UpdatedBy = user.ID
+	item.UpdatedByID = user.ID
 
 	// 保存更新
 	if err := models.DB.Save(&item).Error; err != nil {
@@ -218,6 +225,8 @@ func UpdateSecretItem(c *gin.Context) {
 		Preload("Creator").
 		Preload("Updater").
 		First(&item, "id = ?", id)
+
+	middleware.AuditLog(types.AuditLogActionUpdate, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusOK, item)
 }
@@ -236,6 +245,8 @@ func DeleteSecretItem(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "删除失败"})
 		return
 	}
+
+	middleware.AuditLog(types.AuditLogActionDelete, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusOK, types.MessageResponse{Message: "删除成功"})
 }

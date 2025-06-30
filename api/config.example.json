@@ -11,7 +11,12 @@
   },
   "security": {
     "encryption_key": "32-byte-long-key-for-encryption!",
-    "jwt_secret": "your-jwt-secret-key-here"
+    "jwt_secret": "your-jwt-secret-key-here",
+    "webauthn": {
+      "rp_display_name": "企业敏感信息管理系统",
+      "rp_id": "localhost",
+      "rp_origins": ["http://localhost:5173", "http://localhost:8080"]
+    }
   },
   "server": {
     "port": 8080,

@@ -5,24 +5,28 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  Fingerprint,
   History,
   Key,
   Loader2,
   LogIn,
   Mail,
+  Plus,
   RefreshCw,
   Save,
   Shield,
+  Trash2,
   User,
 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import { userAPI } from '@/api'
+import { userAPI, webauthnAPI, type WebAuthnCredential } from '@/api'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { formatDate, formatRelativeTime, generatePassword, getRoleDisplayName, validatePasswordStrength } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
+import { createCredential, isWebAuthnSupported } from '@/utils/webauthn'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
@@ -33,6 +37,15 @@ const loadingHistory = ref(false)
 const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
+
+// WebAuthn 相关
+const webauthnSupported = ref(false)
+const credentials = ref<WebAuthnCredential[]>([])
+const loadingCredentials = ref(false)
+const addingCredential = ref(false)
+const deletingCredentialId = ref<string | null>(null)
+const showAddCredentialDialog = ref(false)
+const newCredentialName = ref('')
 
 const profileForm = ref({
   name: '',
@@ -144,6 +157,68 @@ async function loadLoginHistory() {
   }
 }
 
+// WebAuthn 相关函数
+async function loadCredentials() {
+  loadingCredentials.value = true
+  try {
+    const data = await webauthnAPI.getCredentials()
+    credentials.value = data || []
+  }
+  catch (error) {
+    console.error('Failed to load credentials:', error)
+  }
+  finally {
+    loadingCredentials.value = false
+  }
+}
+
+async function addCredential() {
+  if (!newCredentialName.value.trim()) {
+    return
+  }
+
+  addingCredential.value = true
+  try {
+    // 开始注册
+    const options = await webauthnAPI.beginRegistration(newCredentialName.value)
+
+    // 创建凭证
+    const credential = await createCredential(options)
+
+    // 完成注册
+    await webauthnAPI.finishRegistration(newCredentialName.value, credential)
+
+    // 重新加载凭证列表
+    await loadCredentials()
+
+    // 关闭对话框并清空输入
+    showAddCredentialDialog.value = false
+    newCredentialName.value = ''
+  }
+  catch (error: any) {
+    console.error('Failed to add credential:', error)
+    // alert(error.message || '添加 Passkey 失败')
+  }
+  finally {
+    addingCredential.value = false
+  }
+}
+
+async function deleteCredential(id: string) {
+  deletingCredentialId.value = id
+  try {
+    await webauthnAPI.deleteCredential(id)
+    await loadCredentials()
+  }
+  catch (error) {
+    console.error('Failed to delete credential:', error)
+    // alert('删除失败')
+  }
+  finally {
+    deletingCredentialId.value = null
+  }
+}
+
 onMounted(() => {
   if (user.value) {
     profileForm.value = {
@@ -152,6 +227,12 @@ onMounted(() => {
     }
   }
   loadLoginHistory()
+
+  // 检查 WebAuthn 支持并加载凭证
+  webauthnSupported.value = isWebAuthnSupported()
+  if (webauthnSupported.value) {
+    loadCredentials()
+  }
 })
 </script>
 
@@ -171,7 +252,7 @@ onMounted(() => {
       <div class="md:col-span-2 space-y-6">
         <!-- 基本信息 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6 py-2">
             <h3 class="text-lg font-semibold mb-4">
               基本信息
             </h3>
@@ -210,7 +291,7 @@ onMounted(() => {
 
         <!-- 修改密码 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6 py-2">
             <h3 class="text-lg font-semibold mb-4">
               修改密码
             </h3>
@@ -288,9 +369,69 @@ onMounted(() => {
           </div>
         </Card>
 
+        <!-- Passkey 管理 -->
+        <Card v-if="webauthnSupported">
+          <div class="px-6 py-2">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold flex items-center">
+                <Fingerprint class="mr-2 h-5 w-5" />
+                Passkey 管理
+              </h3>
+              <Button size="sm" @click="showAddCredentialDialog = true">
+                <Plus class="mr-2 h-4 w-4" />
+                添加 Passkey
+              </Button>
+            </div>
+
+            <div v-if="loadingCredentials" class="flex items-center justify-center py-4">
+              <Loader2 class="h-5 w-5 animate-spin" />
+              <span class="ml-2 text-sm">加载中...</span>
+            </div>
+
+            <div v-else-if="credentials.length === 0" class="text-center py-8 text-muted-foreground">
+              <Fingerprint class="mx-auto h-12 w-12 mb-2 opacity-50" />
+              <p class="text-sm">
+                还没有添加任何 Passkey
+              </p>
+              <p class="text-xs mt-1">
+                添加 Passkey 后，您可以使用指纹、面容或设备密码快速登录
+              </p>
+            </div>
+
+            <div v-else class="space-y-3">
+              <div
+                v-for="credential in credentials"
+                :key="credential.id"
+                class="flex items-center justify-between p-4 border border-border rounded-lg"
+              >
+                <div>
+                  <p class="font-medium">
+                    {{ credential.credential_name || '未命名的 Passkey' }}
+                  </p>
+                  <p class="text-sm text-muted-foreground">
+                    创建于 {{ formatDate(credential.created_at) }}
+                    <span v-if="credential.last_used_at">
+                      · 最后使用 {{ formatRelativeTime(credential.last_used_at) }}
+                    </span>
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  :disabled="deletingCredentialId === credential.id"
+                  @click="deleteCredential(credential.id)"
+                >
+                  <Loader2 v-if="deletingCredentialId === credential.id" class="h-4 w-4 animate-spin" />
+                  <Trash2 v-else class="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         <!-- 登录历史 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6 py-2">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold">
                 最近登录记录
@@ -350,7 +491,7 @@ onMounted(() => {
       <div class="space-y-6">
         <!-- 账户信息 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6 py-2">
             <h3 class="text-lg font-semibold mb-4">
               账户信息
             </h3>
@@ -428,5 +569,36 @@ onMounted(() => {
         </Card>
       </div>
     </div>
+
+    <!-- 添加 Passkey 对话框 -->
+    <AlertDialog v-model:open="showAddCredentialDialog">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>添加新的 Passkey</AlertDialogTitle>
+          <AlertDialogDescription>
+            为这个 Passkey 设置一个名称，方便您识别不同的设备或浏览器。
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div class="py-4">
+          <Input
+            v-model="newCredentialName"
+            placeholder="例如：MacBook Pro 指纹"
+            :disabled="addingCredential"
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel :disabled="addingCredential">
+            取消
+          </AlertDialogCancel>
+          <AlertDialogAction
+            :disabled="!newCredentialName.trim() || addingCredential"
+            @click="addCredential"
+          >
+            <Loader2 v-if="addingCredential" class="mr-2 h-4 w-4 animate-spin" />
+            {{ addingCredential ? '添加中...' : '继续' }}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 </template>

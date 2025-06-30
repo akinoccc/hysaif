@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/akinoccc/hysaif/api/handlers"
 	"github.com/akinoccc/hysaif/api/middleware"
+	"github.com/akinoccc/hysaif/api/types"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,10 @@ func InitRouter(r *gin.Engine) {
 		{
 			auth.POST("/login", handlers.Login)
 			auth.POST("/logout", handlers.Logout)
+
+			// WebAuthn 路由
+			auth.POST("/webauthn/login/begin", handlers.WebAuthnBeginLogin)
+			auth.POST("/webauthn/login/finish", handlers.WebAuthnFinishLogin)
 		}
 
 		// 需要认证的路由
@@ -29,10 +34,17 @@ func InitRouter(r *gin.Engine) {
 		{
 			// 用户管理
 			users := protected.Group("/users")
+			users.Use(middleware.AutoAuditLog(types.AuditLogResourceUser))
 			{
 				// 个人资料相关（所有用户都可以访问自己的资料）
 				users.GET("/profile", handlers.GetProfile)
 				users.PUT("/profile", handlers.UpdateProfile)
+
+				// WebAuthn 凭证管理
+				users.POST("/webauthn/register/begin", handlers.WebAuthnBeginRegistration)
+				users.POST("/webauthn/register/finish", handlers.WebAuthnFinishRegistration)
+				users.GET("/webauthn/credentials", handlers.GetUserCredentials)
+				users.DELETE("/webauthn/credentials/:id", handlers.DeleteUserCredential)
 
 				// 用户CRUD操作（需要用户管理权限）
 				users.GET("/", middleware.RequirePermission("user", "read"), handlers.GetUsers)
@@ -52,20 +64,35 @@ func InitRouter(r *gin.Engine) {
 				items.DELETE("/:id", middleware.RequirePermission("secret", "delete"), handlers.DeleteSecretItem)
 
 				// 通过申请访问密钥项（所有用户都可以使用）
-				items.GET("/:id/access", handlers.GetItemWithAccessCheck)
+				items.GET("/:id/access",
+					middleware.AuditLog(types.AuditLogActionAccess, types.AuditLogResourceCustom),
+					handlers.GetItemWithAccessCheck)
 			}
 
 			// 访问申请管理
 			access := protected.Group("/access-requests")
 			{
 				// 创建访问申请（所有用户都可以）
-				access.POST("/", handlers.CreateAccessRequest)
+				access.POST("/",
+					middleware.AuditLog(types.AuditLogActionRequest, types.AuditLogResourceAccessRequest),
+					handlers.CreateAccessRequest)
 				// 获取申请列表（用户只能看自己的，管理员可以看全部）
-				access.GET("/", handlers.GetAccessRequests)
+				access.GET("/",
+					middleware.AutoAuditLog(types.AuditLogResourceAccessRequest),
+					handlers.GetAccessRequests)
 				// 审批申请（需要管理权限）
-				access.PUT("/:id/approve", middleware.RequirePermission("access_request", "approve"), handlers.ApproveAccessRequest)
-				access.PUT("/:id/reject", middleware.RequirePermission("access_request", "approve"), handlers.RejectAccessRequest)
-				access.PUT("/:id/revoke", middleware.RequirePermission("access_request", "approve"), handlers.RevokeAccessRequest)
+				access.PUT("/:id/approve",
+					middleware.RequirePermission("access_request", "approve"),
+					middleware.AuditLog(types.AuditLogActionApprove, types.AuditLogResourceAccessRequest),
+					handlers.ApproveAccessRequest)
+				access.PUT("/:id/reject",
+					middleware.RequirePermission("access_request", "approve"),
+					middleware.AuditLog(types.AuditLogActionReject, types.AuditLogResourceAccessRequest),
+					handlers.RejectAccessRequest)
+				access.PUT("/:id/revoke",
+					middleware.RequirePermission("access_request", "approve"),
+					middleware.AuditLog(types.AuditLogActionRevoke, types.AuditLogResourceAccessRequest),
+					handlers.RevokeAccessRequest)
 			}
 
 			// 通知管理
@@ -106,6 +133,12 @@ func InitRouter(r *gin.Engine) {
 
 				// 获取用户可访问的菜单列表
 				permissions.GET("/menus", handlers.GetUserAccessibleMenus)
+			}
+
+			// 审计日志查询
+			audit := protected.Group("/audit")
+			{
+				audit.GET("/logs", middleware.RequirePermission("audit", "read"), handlers.GetAuditLogs)
 			}
 		}
 	}

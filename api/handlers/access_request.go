@@ -173,7 +173,7 @@ func ApproveAccessRequest(c *gin.Context) {
 
 	// 更新申请状态
 	accessRequest.Status = models.RequestStatusApproved
-	accessRequest.ApprovedBy = user.ID
+	accessRequest.ApprovedByID = user.ID
 	accessRequest.ApprovedAt = now
 	accessRequest.ValidFrom = now
 	accessRequest.ValidUntil = validUntil
@@ -260,7 +260,7 @@ func RejectAccessRequest(c *gin.Context) {
 
 	// 更新申请状态
 	accessRequest.Status = models.RequestStatusRejected
-	accessRequest.ApprovedBy = user.ID
+	accessRequest.ApprovedByID = user.ID
 	accessRequest.ApprovedAt = uint64(time.Now().Unix())
 	accessRequest.RejectReason = req.Reason
 

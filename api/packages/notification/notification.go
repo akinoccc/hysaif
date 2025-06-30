@@ -274,9 +274,9 @@ func getAuthorizedUsers(secretItem *models.SecretItem) ([]models.User, error) {
 	users = append(users, admins...)
 
 	// 获取创建者
-	if secretItem.CreatedBy != "" {
+	if secretItem.CreatedByID != "" {
 		var creator models.User
-		if err := models.DB.Where("id = ? AND status = ?", secretItem.CreatedBy, "active").First(&creator).Error; err == nil {
+		if err := models.DB.Where("id = ? AND status = ?", secretItem.CreatedByID, "active").First(&creator).Error; err == nil {
 			users = append(users, creator)
 		}
 	}

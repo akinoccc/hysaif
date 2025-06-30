@@ -48,6 +48,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const setAuth = (t: string, u: User) => {
+    token.value = t
+    user.value = u
+  }
+
   return {
     user,
     token,
@@ -57,6 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
     isSecurityManager,
     login,
     logout,
+    setAuth,
   }
 }, {
   persist: true,

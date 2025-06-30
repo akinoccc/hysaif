@@ -19,11 +19,11 @@ const (
 // AccessRequest 访问申请模型
 type AccessRequest struct {
 	ModelBase
-	SecretItemID string `json:"secret_item_id" gorm:"not null"`  // 申请访问的密钥项ID
-	ApplicantID  string `json:"applicant_id" gorm:"not null"`    // 申请人ID
+	SecretItemID string `json:"-" gorm:"not null"`               // 申请访问的密钥项ID
+	ApplicantID  string `json:"-" gorm:"not null"`               // 申请人ID
 	Reason       string `json:"reason" gorm:"not null"`          // 申请理由
 	Status       string `json:"status" gorm:"default:'pending'"` // 申请状态
-	ApprovedBy   string `json:"approved_by"`                     // 审批人ID
+	ApprovedByID string `json:"-" gorm:"index"`                  // 审批人ID
 	ApprovedAt   uint64 `json:"approved_at"`                     // 审批时间
 	Note         string `json:"note"`                            // 备注
 	RejectReason string `json:"reject_reason"`                   // 拒绝理由
@@ -35,7 +35,7 @@ type AccessRequest struct {
 	// 关联
 	SecretItem SecretItem `json:"secret_item" gorm:"foreignKey:SecretItemID"`
 	Applicant  User       `json:"applicant" gorm:"foreignKey:ApplicantID"`
-	Approver   User       `json:"approver" gorm:"foreignKey:ApprovedBy"`
+	Approver   User       `json:"approver" gorm:"foreignKey:ApprovedByID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

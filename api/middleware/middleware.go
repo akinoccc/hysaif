@@ -100,24 +100,6 @@ func ErrorHandler() gin.HandlerFunc {
 	return gin.Recovery()
 }
 
-// AuditLog 审计日志中间件
-func AuditLog(action, resource string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		// 记录审计日志
-		user := context.GetCurrentUser(c)
-		if user == nil {
-			return
-		}
-
-		resourceID := c.Param("id")
-		if resourceID == "" {
-			resourceID = "N/A"
-		}
-	}
-}
-
 // RequirePermission 权限检查中间件
 func RequirePermission(resource, action string) gin.HandlerFunc {
 	return func(c *gin.Context) {

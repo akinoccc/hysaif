@@ -5,6 +5,7 @@ const (
 	AuditLogResourceApiKey        = "api_key"
 	AuditLogResourceAccessKey     = "access_key"
 	AuditLogResourceSshKey        = "ssh_key"
+	AuditLogResourcePassword      = "password"
 	AuditLogResourceToken         = "token"
 	AuditLogResourceCustom        = "custom"
 	AuditLogResourceAccessRequest = "access_request"

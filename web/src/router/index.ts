@@ -1,4 +1,4 @@
-import { Bell, LayoutDashboard, Shield, UserCheck, Users } from 'lucide-vue-next'
+import { Bell, FileText, LayoutDashboard, Shield, UserCheck, Users } from 'lucide-vue-next'
 import { createRouter, createWebHistory } from 'vue-router'
 import { SECRET_ITEM_TYPE, SECRET_ITEM_TYPE_MAP } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
@@ -51,6 +51,20 @@ const router = createRouter({
               title: '权限管理',
               icon: Shield,
               order: 3,
+              showInMenu: true,
+            },
+          },
+        },
+        {
+          path: '/audit',
+          name: 'Audit',
+          component: () => import('@/views/audit/AuditLogs.vue'),
+          meta: {
+            requiresAuth: true,
+            roles: ['super_admin', 'sec_mgr', 'auditor'],
+            menu: {
+              title: '审计日志',
+              icon: FileText,
               showInMenu: true,
             },
           },

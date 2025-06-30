@@ -166,8 +166,8 @@ func CreateUser(c *gin.Context) {
 		Role:        req.Role,
 		Status:      models.StatusActive,
 		Permissions: req.Permissions,
-		CreatedBy:   user.ID,
-		UpdatedBy:   user.ID,
+		CreatedByID: user.ID,
+		UpdatedByID: user.ID,
 	}
 
 	if err := models.DB.Create(&newUser).Error; err != nil {
@@ -300,7 +300,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	// 更新修改者信息
-	targetUser.UpdatedBy = user.ID
+	targetUser.UpdatedByID = user.ID
 
 	// 保存更新
 	if err := models.DB.Save(&targetUser).Error; err != nil {

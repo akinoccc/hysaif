@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { AlertCircle, Building2, Loader2, Shield } from 'lucide-vue-next'
-import { reactive, ref } from 'vue'
+import { AlertCircle, Building2, Fingerprint, Loader2, Shield } from 'lucide-vue-next'
+import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { webauthnAPI } from '@/api'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '@/stores/auth'
+import { getCredential, isWebAuthnSupported } from '@/utils/webauthn'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -18,7 +20,13 @@ const form = reactive({
 })
 
 const loading = ref(false)
+const passkeyLoading = ref(false)
 const error = ref('')
+const webauthnSupported = ref(false)
+
+onMounted(() => {
+  webauthnSupported.value = isWebAuthnSupported()
+})
 
 async function handleLogin() {
   if (!form.email || !form.password) {
@@ -39,6 +47,39 @@ async function handleLogin() {
   }
 
   loading.value = false
+}
+
+async function handlePasskeyLogin() {
+  if (!form.email) {
+    error.value = '请输入邮箱地址'
+    return
+  }
+
+  passkeyLoading.value = true
+  error.value = ''
+
+  try {
+    // 开始 WebAuthn 登录
+    const options = await webauthnAPI.beginLogin(form.email)
+
+    // 获取凭证
+    const credential = await getCredential(options)
+
+    // 完成登录
+    const data = await webauthnAPI.finishLogin(form.email, credential)
+
+    // 保存登录状态
+    authStore.setAuth(data.token, data.user)
+
+    router.push('/dashboard')
+  }
+  catch (err: any) {
+    console.error('Passkey login error:', err)
+    error.value = err.response?.data?.error || err.message || 'Passkey 登录失败'
+  }
+  finally {
+    passkeyLoading.value = false
+  }
 }
 </script>
 
@@ -185,6 +226,29 @@ async function handleLogin() {
                   >
                     <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                     {{ loading ? '登录中...' : '登录系统' }}
+                  </Button>
+
+                  <!-- Passkey 登录按钮 -->
+                  <div v-if="webauthnSupported && form.email" class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                      <span class="w-full border-t border-border" />
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                      <span class="bg-background px-2 text-muted-foreground">或</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    v-if="webauthnSupported && form.email"
+                    type="button"
+                    variant="outline"
+                    :disabled="passkeyLoading"
+                    class="w-full h-11"
+                    @click="handlePasskeyLogin"
+                  >
+                    <Loader2 v-if="passkeyLoading" class="mr-2 h-4 w-4 animate-spin" />
+                    <Fingerprint v-else class="mr-2 h-4 w-4" />
+                    {{ passkeyLoading ? '验证中...' : '使用 Passkey 登录' }}
                   </Button>
                 </div>
               </Form>

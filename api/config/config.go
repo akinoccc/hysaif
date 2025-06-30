@@ -28,8 +28,16 @@ type DatabaseConfig struct {
 
 // SecurityConfig 安全配置
 type SecurityConfig struct {
-	EncryptionKey string `json:"encryption_key"`
-	JWTSecret     string `json:"jwt_secret"`
+	EncryptionKey string         `json:"encryption_key"`
+	JWTSecret     string         `json:"jwt_secret"`
+	WebAuthn      WebAuthnConfig `json:"webauthn"`
+}
+
+// WebAuthnConfig WebAuthn 配置
+type WebAuthnConfig struct {
+	RPDisplayName string   `json:"rp_display_name"` // 网站显示名称
+	RPID          string   `json:"rp_id"`           // 网站域名
+	RPOrigins     []string `json:"rp_origins"`      // 允许的源地址
 }
 
 // ServerConfig 服务器配置

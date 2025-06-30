@@ -13,7 +13,7 @@ import (
 // WebAuthnCredential WebAuthn 凭证模型
 type WebAuthnCredential struct {
 	ModelBase
-	UserID          string `json:"user_id" gorm:"type:varchar(36);index"`
+	UserID          string `json:"-" gorm:"type:varchar(36);index"`
 	CredentialID    string `json:"credential_id" gorm:"type:varchar(255);uniqueIndex"` // Base64 编码的凭证ID
 	PublicKey       string `json:"public_key" gorm:"type:text"`                        // Base64 编码的公钥
 	AttestationType string `json:"attestation_type"`

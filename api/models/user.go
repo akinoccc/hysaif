@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/base64"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/akinoccc/hysaif/api/packages/permission"
@@ -42,8 +43,8 @@ type User struct {
 	LastLoginIP    string   `json:"last_login_ip"`
 	FailedAttempts int      `json:"failed_attempts" gorm:"default:0"`             // 登录失败次数
 	Permissions    []string `json:"permissions" gorm:"type:text;serializer:json"` // 特殊权限列表
-	CreatedBy      string   `json:"created_by"`
-	UpdatedBy      string   `json:"updated_by"`
+	CreatedByID    string   `json:"-" gorm:"index"`
+	UpdatedByID    string   `json:"-" gorm:"index"`
 
 	// 企业微信相关字段
 	WeWorkUserID string `json:"wework_user_id" gorm:"index"`       // 企业微信用户ID
@@ -54,11 +55,11 @@ type User struct {
 	Position     string `json:"position"`                          // 职位
 	LoginType    string `json:"login_type" gorm:"default:'local'"` // 登录类型：local, wework
 
-	Creator *User `json:"creator" gorm:"foreignKey:CreatedBy"`
-	Updater *User `json:"updater" gorm:"foreignKey:UpdatedBy"`
+	Creator *User `json:"creator" gorm:"foreignKey:CreatedByID"`
+	Updater *User `json:"updater" gorm:"foreignKey:UpdatedByID"`
 
 	// WebAuthn 凭证（不在JSON中序列化）
-	Credentials []WebAuthnCredential `json:"-" gorm:"foreignKey:UserID"`
+	Credentials []WebAuthnCredential `json:"-"`
 }
 
 // BeforeCreate 密码加密
@@ -161,6 +162,7 @@ func (u *User) WebAuthnCredentials() []webauthn.Credential {
 // AddWebAuthnCredential 添加 WebAuthn 凭证
 func (u *User) AddWebAuthnCredential(credential *webauthn.Credential, name string) error {
 	webauthnCred := FromWebAuthnCredential(u.ID, credential, name)
+	log.Printf("webauthnCred: %+v", webauthnCred.CredentialName)
 	return DB.Create(webauthnCred).Error
 }
 

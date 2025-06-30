@@ -6,13 +6,15 @@ import {
   Eye,
   Shield,
 } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { type SecretItem, secretItemAPI } from '@/api'
+import { auditAPI, type AuditLog, type SecretItem, secretItemAPI } from '@/api'
 import { PermissionButton } from '@/components'
 import { Card } from '@/components/ui/card'
+import { AUDIT_LOG_ACTION_LIST, AUDIT_LOG_ACTION_MAP, AUDIT_LOG_RESOURCE_MAP } from '@/constants/auditLog'
 import { formatRelativeTime, getFileIcon } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
+import { getActionColor } from './audit/helper'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -25,6 +27,20 @@ const stats = ref({
 })
 
 const recentItems = ref<SecretItem[]>([])
+const recentLogs = ref<AuditLog[]>([])
+
+const canViewAudit = computed(() => {
+  // todo: 权限控制
+  return true
+})
+
+function getActionDisplayName(action: string) {
+  return AUDIT_LOG_ACTION_MAP[action as keyof typeof AUDIT_LOG_ACTION_MAP] || action
+}
+
+function getResourceDisplayName(resource: string) {
+  return AUDIT_LOG_RESOURCE_MAP[resource as keyof typeof AUDIT_LOG_RESOURCE_MAP] || resource
+}
 
 async function loadDashboardData() {
   try {
@@ -42,6 +58,18 @@ async function loadDashboardData() {
       const expiresAt = new Date(item.expires_at)
       return expiresAt <= thirtyDaysLater
     }).length
+
+    // 加载审计日志（如果有权限）
+    if (canViewAudit.value) {
+      const logsResponse = await auditAPI.getLogs({ page: 1, page_size: 5 })
+      recentLogs.value = logsResponse.data || []
+
+      // 计算今日访问次数
+      const today = new Date().toISOString().split('T')[0]
+      stats.value.todayAccess = recentLogs.value.filter((log: AuditLog) => {
+        return log.created_at.startsWith(today) && log.action === AUDIT_LOG_ACTION_LIST.Read
+      }).length
+    }
   }
   catch (error) {
     console.error('Failed to load dashboard data:', error)
@@ -171,6 +199,49 @@ onMounted(() => {
               </div>
             </div>
             <div v-if="recentItems.length === 0" class="text-center py-8 text-muted-foreground">
+              暂无数据
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <!-- 最近活动 -->
+      <Card class="theme-transition">
+        <div class="px-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">
+              最近活动
+            </h3>
+            <PermissionButton
+              v-if="canViewAudit"
+              variant="ghost"
+              size="sm"
+              :permission="{ resource: 'audit', action: 'read' }"
+              @click="router.push('/audit')"
+            >
+              查看全部
+              <ArrowRight class="ml-2 h-4 w-4" />
+            </PermissionButton>
+          </div>
+          <div class="space-y-3">
+            <div
+              v-for="log in recentLogs"
+              :key="log.id"
+              class="flex items-center space-x-3 p-3 rounded-lg border border-border theme-transition"
+            >
+              <div class="flex-shrink-0">
+                <div class="w-2 h-2 rounded-full" :class="getActionColor(log.action)" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">
+                  {{ log.user?.name }} {{ getActionDisplayName(log.action) }}了 {{ getResourceDisplayName(log.resource) }}
+                </p>
+                <p class="text-xs text-muted-foreground">
+                  {{ formatRelativeTime(log.created_at) }}
+                </p>
+              </div>
+            </div>
+            <div v-if="recentLogs.length === 0" class="text-center py-8 text-muted-foreground">
               暂无数据
             </div>
           </div>
