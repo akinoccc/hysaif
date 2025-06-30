@@ -1,6 +1,7 @@
 # Git
 .git
 .gitignore
+.github/
 
 # Documentation
 *.md
@@ -14,6 +15,7 @@
 # IDE
 .vscode/
 .idea/
+.trae
+.cursor
 
-# But keep nginx config
-!nginx/ 
+deploy/demo/
