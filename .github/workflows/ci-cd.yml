@@ -195,16 +195,27 @@ jobs:
     - name: Checkout代码
       uses: actions/checkout@v4
 
-    - name: 复制配置文件到服务器
-      uses: appleboy/scp-action@v0.1.7
+    - name: 复制docker-compose.yml到服务器
+      uses: appleboy/scp-action@v1
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.PORT }}
-        source: "deploy/demo/docker-compose.yml,deploy/demo/nginx.conf"
+        source: "deploy/demo/docker-compose.yml"
         target: "/data/sims/"
-        strip_components: 0
+        strip_components: 2
+
+    - name: 复制nginx.conf到服务器
+      uses: appleboy/scp-action@v1
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.PORT }}
+        source: "deploy/demo/nginx.conf"
+        target: "/data/sims/nginx/"
+        strip_components: 2
 
     - name: 部署到服务器
       uses: appleboy/ssh-action@v1.0.3
