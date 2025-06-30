@@ -52,7 +52,7 @@ services:
 
   # 后端API服务
   sims-api:
-    image: ${DOCKER_REGISTRY}/sims-api:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/sims-api:${IMAGE_TAG:-latest}
     container_name: sims-api-prod
     restart: unless-stopped
     environment:
@@ -91,7 +91,7 @@ services:
 
   # 前端Web服务
   sims-web:
-    image: ${DOCKER_REGISTRY}/sims-web:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/sims-web:${IMAGE_TAG:-latest}
     container_name: sims-web-prod
     restart: unless-stopped
     depends_on:
