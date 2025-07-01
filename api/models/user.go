@@ -34,17 +34,17 @@ const (
 // User 用户模型
 type User struct {
 	ModelBase
-	Name           string   `json:"name"`
-	Password       string   `json:"-" gorm:"not null"`
-	Email          string   `json:"email" gorm:"type:varchar(191);uniqueIndex;not null"`
-	Role           string   `json:"role" gorm:"default:'dev'"`      // super_admin, sec_mgr, dev, auditor, bot
-	Status         string   `json:"status" gorm:"default:'active'"` // active, disabled, locked, expired
-	LastLoginAt    uint64   `json:"last_login_at"`
-	LastLoginIP    string   `json:"last_login_ip"`
-	FailedAttempts int      `json:"failed_attempts" gorm:"default:0"`             // 登录失败次数
-	Permissions    []string `json:"permissions" gorm:"type:text;serializer:json"` // 特殊权限列表
-	CreatedByID    string   `json:"-" gorm:"index"`
-	UpdatedByID    string   `json:"-" gorm:"index"`
+	Name            string   `json:"name"`
+	Password        string   `json:"-" gorm:"not null"`
+	Email           string   `json:"email" gorm:"type:varchar(191);uniqueIndex;not null"`
+	Role            string   `json:"role" gorm:"default:'dev'"`      // super_admin, sec_mgr, dev, auditor, bot
+	Status          string   `json:"status" gorm:"default:'active'"` // active, disabled, locked, expired
+	LastLoginAt     uint64   `json:"last_login_at"`
+	LastLoginIP     string   `json:"last_login_ip"`
+	FailedAttempts  int      `json:"failed_attempts" gorm:"default:0"`             // 登录失败次数
+	Permissions     []string `json:"permissions" gorm:"type:text;serializer:json"` // 特殊权限列表
+	CreatedByUserID string   `json:"-" gorm:"index"`
+	UpdatedByUserID string   `json:"-" gorm:"index"`
 
 	// 企业微信相关字段
 	WeWorkUserID string `json:"wework_user_id" gorm:"index"`       // 企业微信用户ID
@@ -55,8 +55,8 @@ type User struct {
 	Position     string `json:"position"`                          // 职位
 	LoginType    string `json:"login_type" gorm:"default:'local'"` // 登录类型：local, wework
 
-	Creator *User `json:"creator" gorm:"foreignKey:CreatedByID"`
-	Updater *User `json:"updater" gorm:"foreignKey:UpdatedByID"`
+	Creator *User `json:"creator" gorm:"foreignKey:CreatedByUserID;references:ID"`
+	Updater *User `json:"updater" gorm:"foreignKey:UpdatedByUserID;references:ID"`
 
 	// WebAuthn 凭证（不在JSON中序列化）
 	Credentials []WebAuthnCredential `json:"-"`

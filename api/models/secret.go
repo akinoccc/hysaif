@@ -29,8 +29,8 @@ type SecretItem struct {
 	HasApprovedAccess bool `json:"has_approved_access" gorm:"-"` // 是否有已批准的访问申请
 
 	// 关联用户
-	Creator User `json:"creator" gorm:"foreignKey:CreatedByID"`
-	Updater User `json:"updater" gorm:"foreignKey:UpdatedByID"`
+	Creator *User `json:"creator" gorm:"foreignKey:CreatedByID;references:ID"`
+	Updater *User `json:"updater" gorm:"foreignKey:UpdatedByID;references:ID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

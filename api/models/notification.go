@@ -49,7 +49,7 @@ type Notification struct {
 	Metadata    string `json:"metadata" gorm:"type:text"`        // 额外元数据（JSON格式）
 
 	// 关联
-	Recipient User `json:"recipient" gorm:"foreignKey:RecipientID"`
+	Recipient User `json:"recipient" gorm:"foreignKey:RecipientID;references:ID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

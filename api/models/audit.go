@@ -17,7 +17,7 @@ type AuditLog struct {
 	UserAgent  string `json:"user_agent"`
 
 	// 关联
-	User User `json:"user" gorm:"foreignKey:UserID"`
+	User User `json:"user" gorm:"foreignKey:UserID;references:ID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

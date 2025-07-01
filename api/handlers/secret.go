@@ -34,7 +34,7 @@ func GetSecretItems(c *gin.Context) {
 
 	offset := (page - 1) * pageSize
 
-	query := models.DB.Model(&models.SecretItem{}).Preload("Creator").Preload("Updater")
+	query := models.DB.Model(&models.SecretItem{})
 
 	if category != "" {
 		query = query.Where("category = ?", category)
@@ -80,7 +80,12 @@ func GetSecretItems(c *gin.Context) {
 	query.Count(&total)
 
 	var items []models.SecretItem
-	if err := query.Offset(offset).Limit(pageSize).Find(&items).Error; err != nil {
+	if err := query.
+		Preload("Creator").
+		Preload("Updater").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&items).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
 		return
 	}

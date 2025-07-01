@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -219,12 +218,16 @@ func WebAuthnFinishLogin(c *gin.Context) {
 		Email string `json:"email"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// 先读取原始请求体
+	bodyBytes, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "读取请求数据失败"})
+		return
+	}
+	if err := json.Unmarshal(bodyBytes, &req); err != nil {
 		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
 		return
 	}
-
-	log.Printf("WebAuthn login request: %+v", req)
 
 	// 查找用户
 	var user models.User
@@ -247,8 +250,12 @@ func WebAuthnFinishLogin(c *gin.Context) {
 		return
 	}
 
+	// 重新创建请求对象给FinishRegistration使用
+	newReq := c.Request.Clone(c.Request.Context())
+	newReq.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+
 	// 完成登录
-	credential, err := webAuthn.FinishLogin(&user, *session, c.Request)
+	credential, err := webAuthn.FinishLogin(&user, *session, newReq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "登录失败: " + err.Error()})
 		return

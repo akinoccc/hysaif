@@ -25,7 +25,7 @@ type WebAuthnCredential struct {
 	LastUsedAt      uint64 `json:"last_used_at"`
 
 	// 关联
-	User User `json:"user" gorm:"foreignKey:UserID"`
+	User User `json:"user" gorm:"foreignKey:UserID;references:ID"`
 }
 
 // BeforeCreate 创建前钩子

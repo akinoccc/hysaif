@@ -33,9 +33,9 @@ type AccessRequest struct {
 	LastAccessed uint64 `json:"last_accessed"`                   // 最后访问时间
 
 	// 关联
-	SecretItem SecretItem `json:"secret_item" gorm:"foreignKey:SecretItemID"`
-	Applicant  User       `json:"applicant" gorm:"foreignKey:ApplicantID"`
-	Approver   User       `json:"approver" gorm:"foreignKey:ApprovedByID"`
+	SecretItem SecretItem `json:"secret_item" gorm:"foreignKey:SecretItemID;references:ID"`
+	Applicant  User       `json:"applicant" gorm:"foreignKey:ApplicantID;references:ID"`
+	Approver   User       `json:"approver" gorm:"foreignKey:ApprovedByID;references:ID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID
