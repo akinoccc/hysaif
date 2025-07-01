@@ -290,8 +290,8 @@ jobs:
               "jwt_secret": "${{ secrets.SIMS_JWT_SECRET }}",
               "webauthn": {
                 "rp_display_name": "Hysaif-企业敏感信息管理系统",
-                "rp_id": "hysaif.akin.icu",
-                "rp_origins": ["https://hysaif.akin.icu"]
+                "rp_id": "hysaif.akino.icu",
+                "rp_origins": ["https://hysaif.akino.icu"]
               }
             }
           }
