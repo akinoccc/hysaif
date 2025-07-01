@@ -8,20 +8,20 @@ import { formatDate } from '@/lib/utils'
 import { usePermissionStore } from '@/stores/permission'
 
 function getStatusClass(item: SecretItem) {
-  if (item.expires_at && item.expires_at < Date.now() / 1000) {
+  if (item.expires_at && item.expires_at < Date.now()) {
     return 'status-error'
   }
-  if (item.expires_at && item.expires_at < (Date.now() / 1000) + 30 * 24 * 60 * 60) {
+  if (item.expires_at && item.expires_at < (Date.now()) + 30 * 24 * 60 * 60) {
     return 'status-warning'
   }
   return 'status-active'
 }
 
 function getStatusText(item: SecretItem) {
-  if (item.expires_at && item.expires_at < Date.now() / 1000) {
+  if (item.expires_at && item.expires_at < Date.now()) {
     return '已过期'
   }
-  if (item.expires_at && item.expires_at < (Date.now() / 1000) + 30 * 24 * 60 * 60) {
+  if (item.expires_at && item.expires_at < (Date.now() + 30 * 24 * 60 * 60)) {
     return '即将过期'
   }
   return '正常'
@@ -77,12 +77,39 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
         }, getStatusText(item))
       },
     },
+    // 创建者列
+    {
+      accessorKey: 'creator',
+      header: '创建者',
+      cell: ({ row }) => {
+        const item = row.original
+        return h('span', { class: 'text-sm text-muted-foreground' }, item.creator?.name)
+      },
+    },
+    // 更新者列
+    {
+      accessorKey: 'updater',
+      header: '更新者',
+      cell: ({ row }) => {
+        const item = row.original
+        return h('span', { class: 'text-sm text-muted-foreground' }, item.updater?.name)
+      },
+    },
     // 创建时间列
     {
       accessorKey: 'created_at',
       header: '创建时间',
       cell: ({ row }) => {
         const date = row.getValue('created_at') as string
+        return h('span', { class: 'text-sm text-muted-foreground' }, formatDate(date))
+      },
+    },
+    // 更新时间列
+    {
+      accessorKey: 'updated_at',
+      header: '更新时间',
+      cell: ({ row }) => {
+        const date = row.getValue('updated_at') as string
         return h('span', { class: 'text-sm text-muted-foreground' }, formatDate(date))
       },
     },
