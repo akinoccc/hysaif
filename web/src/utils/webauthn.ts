@@ -8,8 +8,6 @@
 export function isWebAuthnSupported(): boolean {
   return !!(
     navigator.credentials
-    && navigator.credentials.create
-    && navigator.credentials.get
     && window.PublicKeyCredential
   )
 }
