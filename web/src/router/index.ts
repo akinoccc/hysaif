@@ -41,14 +41,14 @@ const router = createRouter({
           },
         },
         {
-          path: '/permission',
+          path: '/policy',
           name: 'PermissionManagement',
           component: () => import('@/views/permission/Permission.vue'),
           meta: {
             requiresAuth: true,
             roles: ['super_admin', 'sec_mgr'],
             menu: {
-              title: '权限管理',
+              title: '角色权限',
               icon: Shield,
               order: 3,
               showInMenu: true,

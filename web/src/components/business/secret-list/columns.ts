@@ -117,10 +117,10 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
     {
       id: 'actions',
       header: '操作',
-      cell: ({ row }) => {
+      cell: async ({ row }) => {
         const item = row.original
         const permissionStore = usePermissionStore()
-        const hasDirectAccess = permissionStore.hasPermission('secret', 'read')
+        const hasDirectAccess = await permissionStore.hasPermission('secret', 'read')
         const hasApprovedAccess = item.has_approved_access // 后端需要提供此字段
 
         const actions = []

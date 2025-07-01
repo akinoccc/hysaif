@@ -313,7 +313,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 	allMenus := []MenuItemResponse{
 		{Path: "/dashboard", Title: "仪表板", Icon: "LayoutDashboard", Order: 1},
 		{Path: "/users", Title: "用户管理", Icon: "Users", Order: 2},
-		{Path: "/permission", Title: "权限管理", Icon: "Shield", Order: 3},
+		{Path: "/policy", Title: "角色权限", Icon: "Shield", Order: 3},
 		{Path: "/audit", Title: "审计日志", Icon: "FileText", Order: 4},
 		{Path: "/access_requests", Title: "访问申请", Icon: "FileText", Order: 5},
 		{Path: "/api_key", Title: "API密钥", Icon: "Key", Order: 6},
@@ -331,7 +331,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 	}{
 		"/dashboard":       {resource: "dashboard", action: "read"},
 		"/users":           {resource: "users", action: "read"},
-		"/permission":      {resource: "permissions", action: "read"},
+		"/policy":          {resource: "policy", action: "read"},
 		"/audit":           {resource: "audit", action: "read"},
 		"/access_requests": {resource: "access_request", action: "read"},
 		"/api_key":         {resource: "secret", action: "read"},

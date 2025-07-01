@@ -48,11 +48,11 @@ func InitRouter(r *gin.Engine) {
 				users.DELETE("/webauthn/credentials/:id", handlers.DeleteUserCredential)
 
 				// 用户CRUD操作（需要用户管理权限）
-				users.GET("/", middleware.RequirePermission("user", "read"), handlers.GetUsers)
-				users.POST("/", middleware.RequirePermission("user", "create"), handlers.CreateUser)
-				users.GET("/:id", middleware.RequirePermission("user", "read"), handlers.GetUser)
-				users.PUT("/:id", middleware.RequirePermission("user", "update"), handlers.UpdateUser)
-				users.DELETE("/:id", middleware.RequirePermission("user", "delete"), handlers.DeleteUser)
+				users.GET("/", middleware.RequirePermission("users", "read"), handlers.GetUsers)
+				users.POST("/", middleware.RequirePermission("users", "create"), handlers.CreateUser)
+				users.GET("/:id", middleware.RequirePermission("users", "read"), handlers.GetUser)
+				users.PUT("/:id", middleware.RequirePermission("users", "update"), handlers.UpdateUser)
+				users.DELETE("/:id", middleware.RequirePermission("users", "delete"), handlers.DeleteUser)
 			}
 
 			// 信息项管理
@@ -117,20 +117,20 @@ func InitRouter(r *gin.Engine) {
 			permissions := protected.Group("/permissions")
 			{
 				permissions.POST("/check", handlers.CheckPermission)
-				permissions.GET("/policies", middleware.RequirePermission("permission", "read"), handlers.GetPolicies)
-				permissions.POST("/policies", middleware.RequirePermission("permission", "create"), handlers.AddPolicy)
-				permissions.DELETE("/policies", middleware.RequirePermission("permission", "delete"), handlers.RemovePolicy)
-				permissions.POST("/reload", middleware.RequirePermission("permission", "update"), handlers.ReloadPolicy)
+				permissions.GET("/policies", middleware.RequirePermission("permissions", "read"), handlers.GetPolicies)
+				permissions.POST("/policies", middleware.RequirePermission("permissions", "create"), handlers.AddPolicy)
+				permissions.DELETE("/policies", middleware.RequirePermission("permissions", "delete"), handlers.RemovePolicy)
+				permissions.POST("/reload", middleware.RequirePermission("permissions", "update"), handlers.ReloadPolicy)
 
 				// 用户角色管理
-				permissions.POST("/users/roles", middleware.RequirePermission("permission", "create"), handlers.AddRoleForUser)
-				permissions.DELETE("/users/roles", middleware.RequirePermission("permission", "delete"), handlers.DeleteRoleForUser)
-				permissions.GET("/users/:user/roles", middleware.RequirePermission("permission", "read"), handlers.GetRolesForUser)
-				permissions.GET("/roles/:role/users", middleware.RequirePermission("permission", "read"), handlers.GetUsersForRole)
+				permissions.POST("/users/roles", middleware.RequirePermission("permissions", "create"), handlers.AddRoleForUser)
+				permissions.DELETE("/users/roles", middleware.RequirePermission("permissions", "delete"), handlers.DeleteRoleForUser)
+				permissions.GET("/users/:user/roles", middleware.RequirePermission("permissions", "read"), handlers.GetRolesForUser)
+				permissions.GET("/roles/:role/users", middleware.RequirePermission("permissions", "read"), handlers.GetUsersForRole)
 				permissions.GET("/roles/:role/permissions", handlers.GetPermissionsForRole)
 
 				// 批量更新角色权限
-				permissions.PUT("/roles/:role/permissions", middleware.RequirePermission("permission", "update"), handlers.UpdateRolePermissions)
+				permissions.PUT("/roles/:role/permissions", middleware.RequirePermission("permissions", "update"), handlers.UpdateRolePermissions)
 
 				// 获取用户可访问的菜单列表
 				permissions.GET("/menus", handlers.GetUserAccessibleMenus)

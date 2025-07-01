@@ -85,14 +85,10 @@ func (cm *CasbinManager) initPoliciesFromCSV(enforcer *casbin.Enforcer) {
 
 		// 安全管理员权限
 		{"sec_mgr", "dashboard", "read"},
-		{"sec_mgr", "users", "read"},
-		{"sec_mgr", "users", "create"},
-		{"sec_mgr", "users", "update"},
-		{"sec_mgr", "users", "delete"},
-		{"sec_mgr", "permissions", "read"},
-		{"sec_mgr", "permissions", "create"},
-		{"sec_mgr", "permissions", "update"},
-		{"sec_mgr", "permissions", "delete"},
+		{"sec_mgr", "policy", "read"},
+		{"sec_mgr", "policy", "create"},
+		{"sec_mgr", "policy", "update"},
+		{"sec_mgr", "policy", "delete"},
 		{"sec_mgr", "audit", "read"},
 		{"sec_mgr", "secret", "read"},
 		{"sec_mgr", "secret", "create"},
@@ -133,7 +129,6 @@ func (cm *CasbinManager) initPoliciesFromCSV(enforcer *casbin.Enforcer) {
 	// 定义角色继承关系
 	roleInheritance := [][]string{
 		{"sec_mgr", "dev"},
-		{"auditor", "dev"},
 	}
 
 	// 添加角色继承关系

@@ -7,6 +7,7 @@ interface PermissionBinding {
   resource: string
   action: string
   mode?: 'hide' | 'disable' // 默认为 hide
+  fallback?: boolean // 缓存为空时的回退值，默认为 false
 }
 
 /**
@@ -14,6 +15,7 @@ interface PermissionBinding {
  * 用法：
  * v-permission="{ resource: 'user', action: 'create' }" // 隐藏元素
  * v-permission="{ resource: 'user', action: 'create', mode: 'disable' }" // 禁用元素
+ * v-permission="{ resource: 'user', action: 'create', fallback: true }" // 权限未缓存时显示
  */
 const permissionDirective: Directive = {
   mounted(el: HTMLElement, binding) {
@@ -41,8 +43,8 @@ function checkPermission(el: HTMLElement, binding: any) {
     return
   }
 
-  const { resource, action, mode = 'hide' } = value
-  const hasPermission = permissionStore.hasPermission(resource, action)
+  const { resource, action, mode = 'hide', fallback = false } = value
+  const hasPermission = permissionStore.hasPermissionSync(resource, action, fallback)
 
   if (!hasPermission) {
     if (mode === 'disable') {

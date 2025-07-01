@@ -32,7 +32,6 @@ import {
 } from '@/components/ui/sidebar'
 import { useTheme } from '@/composables/useTheme'
 import { useAuthStore } from '@/stores/auth'
-import { isMenuActive } from '@/utils/menu'
 import NavUser from './NavUser.vue'
 
 const route = useRoute()
@@ -56,6 +55,19 @@ const iconMap = {
   Coins,
   Settings,
   Bell,
+}
+
+function isMenuActive(menuPath: string, currentPath: string): boolean {
+  if (menuPath === currentPath) {
+    return true
+  }
+
+  // 检查是否为子路径
+  if (currentPath.startsWith(menuPath) && menuPath !== '/') {
+    return true
+  }
+
+  return false
 }
 
 // 获取用户可访问的菜单

@@ -71,8 +71,9 @@ const permissionModules = [
     permissions: [
       { action: 'create', label: '创建申请', description: '允许创建新的访问申请' },
       { action: 'read', label: '查看申请', description: '允许查看访问申请列表' },
-      { action: 'update', label: '更新申请', description: '允许修改访问申请状态' },
-
+      { action: 'approve', label: '批准申请', description: '允许批准访问申请' },
+      { action: 'reject', label: '拒绝申请', description: '允许拒绝访问申请' },
+      { action: 'cancel', label: '取消申请', description: '允许取消访问申请' },
     ],
   },
   {
@@ -114,6 +115,29 @@ const roleInfo = [
     color: 'bg-gray-500',
   },
 ]
+
+// 角色默认权限（不可删除）
+const defaultRolePermissions: Record<string, Record<string, string[]>> = {
+  super_admin: {
+    // 超级管理员默认拥有所有权限，通过通配符实现
+  },
+  sec_mgr: {
+    audit: ['read'],
+    access_request: ['read', 'approve', 'reject', 'cancel'],
+    policy: ['read', 'update'],
+    secret: ['read', 'create', 'update', 'delete'],
+    dashboard: ['read'],
+  },
+  dev: {
+    access_request: ['create', 'read', 'cancel'],
+    secret: ['request', 'read'],
+    dashboard: ['read'],
+  },
+  auditor: {
+    audit: ['read'],
+    dashboard: ['read'],
+  },
+}
 
 // 角色权限数据
 const rolePermissionsData = ref<Record<string, Record<string, string[]>>>({})
@@ -241,7 +265,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto py-6 space-y-6">
+  <div class="container py-6 space-y-6">
     <div class="flex items-center justify-between">
       <div class="space-y-2">
         <h1 class="text-3xl font-bold tracking-tight">
@@ -252,7 +276,7 @@ onMounted(() => {
         </p>
       </div>
       <PermissionButton
-        :permission="{ resource: 'policy', action: 'read' }"
+        :permission="{ resource: 'permissions', action: 'read' }"
         variant="outline"
         :disabled="loading"
         @click="loadAllRolePermissions"
@@ -434,6 +458,7 @@ onMounted(() => {
     :role="selectedRole"
     :modules="permissionModules"
     :initial-permissions="selectedRole ? rolePermissionsData[selectedRole.value] : {}"
+    :default-permissions="selectedRole ? defaultRolePermissions[selectedRole.value] : {}"
     @save="saveRolePermissions"
   />
 </template>

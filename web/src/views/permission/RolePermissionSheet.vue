@@ -36,10 +36,11 @@ interface Role {
 }
 
 interface Props {
-  open: boolean
+  open?: boolean
   role?: Role
   modules: PermissionModule[]
   initialPermissions: Record<string, string[]>
+  defaultPermissions?: Record<string, string[]>
 }
 
 interface Emits {
@@ -49,6 +50,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   open: false,
+  defaultPermissions: () => ({}),
 })
 
 const emit = defineEmits<Emits>()
@@ -62,20 +64,21 @@ function initializePermissions() {
   const permissions: Record<string, string[]> = {}
   // 使用传入的实际权限数据，如果没有则初始化为空
   props.modules.forEach((module) => {
-    if (props.initialPermissions && props.initialPermissions[module.id]) {
-      permissions[module.id] = [...props.initialPermissions[module.id]]
-    }
-    else {
-      permissions[module.id] = []
-    }
+    const moduleId = module.id
+    const initialPerms = props.initialPermissions?.[moduleId] || []
+    const defaultPerms = props.defaultPermissions?.[moduleId] || []
+
+    // 合并初始权限和默认权限，确保默认权限始终存在
+    const allPerms = new Set([...initialPerms, ...defaultPerms])
+    permissions[moduleId] = Array.from(allPerms)
   })
-  console.log(rolePermissions.value)
   rolePermissions.value = permissions
 }
 
 // 监听角色和权限数据变化
 watch(() => props.role, initializePermissions, { immediate: true })
 watch(() => props.initialPermissions, initializePermissions, { immediate: true })
+watch(() => props.defaultPermissions, initializePermissions, { immediate: true })
 
 // 检查是否为超级管理员通配符权限
 function isSuperAdminWildcard() {
@@ -87,6 +90,12 @@ function isSuperAdminWildcard() {
   )
 }
 
+// 检查权限是否为默认权限（不可删除）
+function isDefaultPermission(moduleId: string, action: string) {
+  const defaultPerms = props.defaultPermissions?.[moduleId] || []
+  return defaultPerms.includes(action)
+}
+
 // 检查权限是否被选中
 function isPermissionChecked(moduleId: string, action: string) {
   // 超级管理员通配符权限处理
@@ -94,8 +103,6 @@ function isPermissionChecked(moduleId: string, action: string) {
     return true
   }
 
-  console.log(moduleId, action)
-  console.log(rolePermissions.value[moduleId]?.includes(action))
   return rolePermissions.value[moduleId]?.includes(action) || false
 }
 
@@ -103,6 +110,11 @@ function isPermissionChecked(moduleId: string, action: string) {
 function togglePermission(moduleId: string, action: string) {
   // 超级管理员通配符权限不允许修改
   if (isSuperAdminWildcard()) {
+    return
+  }
+
+  // 默认权限不允许删除
+  if (isDefaultPermission(moduleId, action)) {
     return
   }
 
@@ -151,10 +163,14 @@ function toggleModuleAll(module: PermissionModule) {
     return
   }
 
+  const defaultPerms = props.defaultPermissions?.[module.id] || []
+
   if (isModuleAllSelected(module)) {
-    rolePermissions.value[module.id] = []
+    // 取消全选时保留默认权限
+    rolePermissions.value[module.id] = [...defaultPerms]
   }
   else {
+    // 全选时包含所有权限
     rolePermissions.value[module.id] = module.permissions.map(p => p.action)
   }
 }
@@ -245,10 +261,13 @@ const sheetDescription = computed(() => {
                 v-for="permission in module.permissions"
                 :key="permission.action"
                 class="flex items-start space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                :class="{
+                  'border-amber-200 bg-amber-50': isDefaultPermission(module.id, permission.action),
+                }"
               >
                 <Checkbox
                   :model-value="isPermissionChecked(module.id, permission.action)"
-                  :disabled="isSuperAdminWildcard()"
+                  :disabled="isSuperAdminWildcard() || isDefaultPermission(module.id, permission.action)"
                   class="mt-0.5"
                   @update:model-value="togglePermission(module.id, permission.action)"
                 />
@@ -262,6 +281,13 @@ const sheetDescription = computed(() => {
                   <p class="text-xs text-muted-foreground leading-relaxed">
                     {{ permission.description }}
                   </p>
+                  <Badge
+                    v-if="isDefaultPermission(module.id, permission.action)"
+                    variant="outline"
+                    class="text-xs text-amber-700 border-amber-300 bg-amber-100"
+                  >
+                    默认权限
+                  </Badge>
                 </div>
               </div>
             </div>

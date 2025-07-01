@@ -1,7 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { type ButtonPermission, type MenuPermission, usePermissionStore } from '@/stores/permission'
-import { BUTTON_PERMISSIONS, PERMISSION_CONFIG } from '@/utils/permission'
 
 /**
  * 权限检查组合式函数
@@ -11,39 +10,42 @@ export function usePermission() {
   const authStore = useAuthStore()
 
   /**
-   * 检查单个权限
+   * 异步权限检查
    * @param resource 资源
    * @param action 操作
+   * @param fallbackValue 回退值
    * @returns 权限检查结果
    */
-  const checkPermission = async (resource: string, action: string) => {
-    return await permissionStore.checkPermission(resource, action)
+  const checkPermission = async (resource: string, action: string, fallbackValue = false) => {
+    return await permissionStore.hasPermission(resource, action, fallbackValue)
   }
 
   /**
-   * 同步检查权限（仅使用缓存）
+   * 同步权限检查（仅使用缓存）
    * @param resource 资源
    * @param action 操作
+   * @param fallbackValue 回退值
    * @returns 是否有权限
    */
-  const hasPermission = (resource: string, action: string) => {
-    return permissionStore.hasPermission(resource, action)
+  const hasPermission = (resource: string, action: string, fallbackValue = false) => {
+    return permissionStore.hasPermissionSync(resource, action, fallbackValue)
   }
 
   /**
    * 响应式权限检查
    * @param resource 资源
    * @param action 操作
+   * @param fallbackValue 回退值
    * @returns 响应式权限状态
    */
-  const usePermissionState = (resource: string, action: string) => {
-    const hasAccess = ref(false)
+  const usePermissionState = (resource: string, action: string, fallbackValue = false) => {
+    const hasAccess = ref(fallbackValue)
     const loading = ref(false)
 
     const checkAccess = async () => {
       loading.value = true
       try {
-        hasAccess.value = await checkPermission(resource, action)
+        hasAccess.value = await checkPermission(resource, action, fallbackValue)
       }
       finally {
         loading.value = false
@@ -58,7 +60,7 @@ export function usePermission() {
           checkAccess()
         }
         else {
-          hasAccess.value = false
+          hasAccess.value = fallbackValue
         }
       },
       { immediate: true },
@@ -74,19 +76,21 @@ export function usePermission() {
   /**
    * 菜单权限检查
    * @param menuPermission 菜单权限配置
+   * @param useAsync 是否使用异步检查
    * @returns 是否有菜单权限
    */
-  const hasMenuPermission = (menuPermission: MenuPermission) => {
-    return permissionStore.hasMenuPermission(menuPermission)
+  const hasMenuPermission = (menuPermission: MenuPermission, useAsync = false) => {
+    return permissionStore.checkMenuPermission(menuPermission, useAsync)
   }
 
   /**
    * 按钮权限检查
    * @param buttonPermission 按钮权限配置
+   * @param useAsync 是否使用异步检查
    * @returns 是否有按钮权限
    */
-  const hasButtonPermission = (buttonPermission: ButtonPermission) => {
-    return permissionStore.hasButtonPermission(buttonPermission)
+  const hasButtonPermission = (buttonPermission: ButtonPermission, useAsync = false) => {
+    return permissionStore.checkButtonPermission(buttonPermission, useAsync)
   }
 
   /**
@@ -95,11 +99,11 @@ export function usePermission() {
    * @returns 权限检查结果
    */
   const checkMultiplePermissions = async (permissions: Array<{ resource: string, action: string }>) => {
-    return await permissionStore.checkPermissions(permissions)
+    return await permissionStore.checkMultiplePermissions(permissions)
   }
 
   /**
-   * 模块权限检查
+   * 模块权限检查（计算属性）
    */
   const modulePermissions = {
     // 用户管理权限
@@ -140,6 +144,15 @@ export function usePermission() {
     dashboard: computed(() => ({
       canRead: hasPermission('dashboard', 'read'),
     })),
+
+    // 访问请求权限
+    accessRequest: computed(() => ({
+      canRead: hasPermission('access_request', 'read'),
+      canCreate: hasPermission('access_request', 'create'),
+      canUpdate: hasPermission('access_request', 'update'),
+      canApprove: hasPermission('access_request', 'approve'),
+      canReject: hasPermission('access_request', 'reject'),
+    })),
   }
 
   /**
@@ -172,9 +185,7 @@ export function usePermission() {
     isSecurityManager: computed(() => permissionStore.isSecurityManager),
     isDeveloper: computed(() => permissionStore.isDeveloper),
     isAuditor: computed(() => permissionStore.isAuditor),
-    // 权限常量
-    PERMISSIONS: PERMISSION_CONFIG,
-    BUTTON_PERMS: BUTTON_PERMISSIONS,
+    currentRole: computed(() => permissionStore.currentRole),
   }
 }
 
@@ -191,7 +202,7 @@ export function usePermissionDirective() {
    * @returns 是否显示
    */
   const shouldShow = (resource: string, action: string): boolean => {
-    return permissionStore.hasPermission(resource, action)
+    return permissionStore.hasPermissionSync(resource, action, false)
   }
 
   /**
@@ -201,7 +212,7 @@ export function usePermissionDirective() {
    * @returns 是否禁用
    */
   const shouldDisable = (resource: string, action: string): boolean => {
-    return !permissionStore.hasPermission(resource, action)
+    return !permissionStore.hasPermissionSync(resource, action, false)
   }
 
   return {
@@ -215,6 +226,7 @@ export function usePermissionDirective() {
  */
 export function useRole() {
   const authStore = useAuthStore()
+  const permissionStore = usePermissionStore()
 
   const hasRole = (role: string | string[]): boolean => {
     const userRole = authStore.user?.role
@@ -246,6 +258,6 @@ export function useRole() {
     hasRole,
     hasAnyRole,
     hasAllRoles,
-    currentRole: computed(() => authStore.user?.role),
+    currentRole: computed(() => permissionStore.currentRole),
   }
 }
