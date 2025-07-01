@@ -39,6 +39,7 @@ func InitRouter(r *gin.Engine) {
 				// 个人资料相关（所有用户都可以访问自己的资料）
 				users.GET("/profile", handlers.GetProfile)
 				users.PUT("/profile", handlers.UpdateProfile)
+				users.GET("/login-history", handlers.GetLoginHistory)
 
 				// WebAuthn 凭证管理
 				users.POST("/webauthn/register/begin", handlers.WebAuthnBeginRegistration)

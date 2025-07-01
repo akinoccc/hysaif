@@ -358,3 +358,22 @@ func DeleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "用户已删除"})
 }
+
+// GetLoginHistory 获取用户登录历史
+func GetLoginHistory(c *gin.Context) {
+	user := context.GetCurrentUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, types.ErrorResponse{Error: "未授权"})
+		return
+	}
+
+	var loginHistory []models.AuditLog
+	if err := models.DB.Where("action = ? AND user_id = ?", types.AuditLogActionLogin, user.ID).Find(&loginHistory).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, &types.ListResponse[models.AuditLog]{
+		Data: loginHistory,
+	})
+}

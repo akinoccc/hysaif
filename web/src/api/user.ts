@@ -1,6 +1,7 @@
 import type {
   ApiListResponse,
   ApiMethod,
+  AuditLog,
   ChangePasswordRequest,
   CreateUserRequest,
   UpdateProfileRequest,
@@ -84,5 +85,13 @@ export const userAPI = {
    */
   deleteUser: (id: string | number): ApiMethod<{ message: string }> => {
     return api.delete(`/users/${id}`)
+  },
+
+  /**
+   * 获取用户登录历史
+   * @returns 用户登录历史
+   */
+  getLoginHistory: (): ApiMethod<ApiListResponse<AuditLog>> => {
+    return api.get('/users/login-history')
   },
 }

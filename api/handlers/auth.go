@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -60,6 +61,9 @@ func Login(c *gin.Context) {
 		"last_login_ip": user.LastLoginIP,
 	})
 
+	// 记录登录日志
+	middleware.LogAuthAction(c, user, types.AuditLogActionLogin)
+
 	c.JSON(http.StatusOK, types.LoginResponse{
 		Token: token,
 		User:  user,
@@ -68,6 +72,10 @@ func Login(c *gin.Context) {
 
 // Logout 用户登出
 func Logout(c *gin.Context) {
+	user := pkgContext.GetCurrentUser(c)
+
+	middleware.LogAuthAction(c, *user, types.AuditLogActionLogout)
+
 	c.JSON(http.StatusOK, types.MessageResponse{Message: "登出成功"})
 }
 
@@ -284,6 +292,10 @@ func WebAuthnFinishLogin(c *gin.Context) {
 
 	// 清理会话
 	delete(loginSessions, user.ID)
+
+	middleware.LogAuthAction(c, user, types.AuditLogActionLogin)
+
+	log.Printf("=================")
 
 	c.JSON(http.StatusOK, types.LoginResponse{
 		Token: token,

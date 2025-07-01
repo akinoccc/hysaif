@@ -146,8 +146,8 @@ async function changePassword() {
 async function loadLoginHistory() {
   loadingHistory.value = true
   try {
-    // const response = await userAPI.getLoginHistory()
-    // loginHistory.value = response.data || []
+    const response = await userAPI.getLoginHistory()
+    loginHistory.value = response.data || []
   }
   catch (error) {
     console.error('Failed to load login history:', error)
