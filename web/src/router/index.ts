@@ -365,8 +365,22 @@ router.beforeEach(async (to, _, next) => {
     return
   }
 
-  // 如果用户已登录，进行基本角色权限检查
+  // 如果用户已登录，确保权限缓存已初始化
   if (authStore.isAuthenticated && authStore.user) {
+    const { usePermissionStore } = await import('@/stores/permission')
+    const permissionStore = usePermissionStore()
+
+    // 检查权限缓存是否为空，如果为空则初始化
+    const cacheKeys = Object.keys(permissionStore.permissionCache)
+    if (cacheKeys.length === 0) {
+      try {
+        await permissionStore.initializePermissions()
+        console.log('路由守卫中权限缓存初始化完成')
+      } catch (error) {
+        console.error('路由守卫中权限缓存初始化失败:', error)
+      }
+    }
+
     // 检查角色权限（基于路由meta配置）
     if (to.meta.roles && authStore.user) {
       const userRole = authStore.user.role

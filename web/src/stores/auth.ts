@@ -19,6 +19,11 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = response.token
       user.value = response.user
 
+      // 登录成功后初始化权限缓存
+      const { usePermissionStore } = await import('./permission')
+      const permissionStore = usePermissionStore()
+      await permissionStore.initializePermissions()
+
       return { success: true }
     }
     catch (error: any) {
@@ -41,6 +46,11 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Logout error:', error)
     }
     finally {
+      // 清除权限缓存
+      const { usePermissionStore } = await import('./permission')
+      const permissionStore = usePermissionStore()
+      permissionStore.clearCache()
+
       token.value = null
       user.value = null
       localStorage.removeItem('token')

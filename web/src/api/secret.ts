@@ -65,4 +65,13 @@ export const secretItemAPI = {
   getItemWithAccess: (id: string | number): ApiMethod<SecretItem> => {
     return api.get(`/items/${id}/access`)
   },
+
+  /**
+   * 获取用户有访问权限的信息项
+   * @param params 查询参数，包括分页、搜索、分类等
+   * @returns 信息项列表响应
+   */
+  getAccessedItems: (params?: ItemsListParams): ApiMethod<ApiListResponse<SecretItem>> => {
+    return api.get('/items/accessed', { params })
+  },
 }

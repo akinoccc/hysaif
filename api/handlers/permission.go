@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/akinoccc/hysaif/api/models"
@@ -296,6 +297,124 @@ type MenuItemResponse struct {
 	Title string `json:"title"`
 	Icon  string `json:"icon"`
 	Order int    `json:"order"`
+}
+
+// BatchCheckPermissionsRequest 批量权限检查请求
+type BatchCheckPermissionsRequest struct {
+	Permissions []PermissionRequest `json:"permissions" binding:"required"`
+}
+
+// BatchCheckPermissionsResponse 批量权限检查响应
+type BatchCheckPermissionsResponse struct {
+	Results map[string]bool `json:"results"`
+}
+
+// GetUserAllPermissions 获取用户的所有权限
+func GetUserAllPermissions(c *gin.Context) {
+	// 获取当前用户
+	user := context.GetCurrentUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	casbinManager := permission.GetCasbinManager(models.DB)
+
+	// 定义所有可能的权限组合
+	allPermissions := []PermissionRequest{
+		// 仪表板权限
+		{Role: user.Role, Resource: "dashboard", Action: "read"},
+
+		// 用户管理权限
+		{Role: user.Role, Resource: "user", Action: "read"},
+		{Role: user.Role, Resource: "user", Action: "create"},
+		{Role: user.Role, Resource: "user", Action: "update"},
+		{Role: user.Role, Resource: "user", Action: "delete"},
+
+		// 权限管理权限
+		{Role: user.Role, Resource: "policy", Action: "read"},
+		{Role: user.Role, Resource: "policy", Action: "create"},
+		{Role: user.Role, Resource: "policy", Action: "update"},
+		{Role: user.Role, Resource: "policy", Action: "delete"},
+
+		// 审计日志权限
+		{Role: user.Role, Resource: "audit", Action: "read"},
+
+		// 密钥管理权限
+		{Role: user.Role, Resource: "secret", Action: "read"},
+		{Role: user.Role, Resource: "secret", Action: "create"},
+		{Role: user.Role, Resource: "secret", Action: "update"},
+		{Role: user.Role, Resource: "secret", Action: "delete"},
+		{Role: user.Role, Resource: "secret", Action: "request"},
+		{Role: user.Role, Resource: "secret", Action: "temp"},
+
+		// 访问申请权限
+		{Role: user.Role, Resource: "access_request", Action: "read"},
+		{Role: user.Role, Resource: "access_request", Action: "create"},
+		{Role: user.Role, Resource: "access_request", Action: "update"},
+		{Role: user.Role, Resource: "access_request", Action: "approve"},
+		{Role: user.Role, Resource: "access_request", Action: "reject"},
+		{Role: user.Role, Resource: "access_request", Action: "cancel"},
+
+		// 通知权限
+		{Role: user.Role, Resource: "notification", Action: "read"},
+		{Role: user.Role, Resource: "notification", Action: "create"},
+		{Role: user.Role, Resource: "notification", Action: "bulk_send"},
+		{Role: user.Role, Resource: "notification", Action: "view_templates"},
+
+		// 自定义资源权限
+		{Role: user.Role, Resource: "custom", Action: "read"},
+		{Role: user.Role, Resource: "custom", Action: "create"},
+		{Role: user.Role, Resource: "custom", Action: "update"},
+		{Role: user.Role, Resource: "custom", Action: "delete"},
+	}
+
+	// 批量检查权限
+	results := make(map[string]bool)
+	for _, perm := range allPermissions {
+		key := fmt.Sprintf("%s:%s", perm.Resource, perm.Action)
+		hasPermission := casbinManager.CheckPermission(user.Role, perm.Resource, perm.Action)
+		results[key] = hasPermission
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"role":        user.Role,
+			"permissions": results,
+		},
+	})
+}
+
+// BatchCheckPermissions 批量检查权限
+func BatchCheckPermissions(c *gin.Context) {
+	var req BatchCheckPermissionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 获取当前用户
+	user := context.GetCurrentUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		return
+	}
+
+	casbinManager := permission.GetCasbinManager(models.DB)
+
+	// 批量检查权限
+	results := make(map[string]bool)
+	for _, perm := range req.Permissions {
+		key := fmt.Sprintf("%s:%s", perm.Resource, perm.Action)
+		hasPermission := casbinManager.CheckPermission(user.Role, perm.Resource, perm.Action)
+		results[key] = hasPermission
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"results": results,
+		},
+	})
 }
 
 // GetUserAccessibleMenus 获取用户可访问的菜单列表

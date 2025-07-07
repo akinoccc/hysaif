@@ -298,14 +298,14 @@ const sheetDescription = computed(() => {
       <!-- 操作按钮 -->
       <div class="flex justify-end space-x-3 mt-8 pt-6 border-t">
         <Button variant="outline" @click="handleClose">
-          <X class="h-4 w-4 mr-2" />
+          <X class="h-4 w-4" />
           取消
         </Button>
         <PermissionButton
           :permission="{ resource: 'policy', action: 'update' }"
           @click="handleSave"
         >
-          <Save class="h-4 w-4 mr-2" />
+          <Save class="h-4 w-4" />
           保存权限
         </PermissionButton>
       </div>

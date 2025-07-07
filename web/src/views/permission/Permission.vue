@@ -281,7 +281,7 @@ onMounted(() => {
         :disabled="loading"
         @click="loadAllRolePermissions"
       >
-        <RefreshCw class="h-4 w-4 mr-2" :class="[{ 'animate-spin': loading }]" />
+        <RefreshCw class="h-4 w-4" :class="[{ 'animate-spin': loading }]" />
         刷新权限
       </PermissionButton>
     </div>

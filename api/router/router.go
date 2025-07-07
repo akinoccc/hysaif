@@ -68,6 +68,9 @@ func InitRouter(r *gin.Engine) {
 				items.GET("/:id/access",
 					middleware.AuditLog(types.AuditLogActionAccess, types.AuditLogResourceCustom),
 					handlers.GetItemWithAccessCheck)
+
+				// 获取用户有访问权限的信息项
+				items.GET("/accessed", handlers.GetAccessedSecretItems)
 			}
 
 			// 访问申请管理
@@ -117,6 +120,8 @@ func InitRouter(r *gin.Engine) {
 			permissions := protected.Group("/permissions")
 			{
 				permissions.POST("/check", handlers.CheckPermission)
+				permissions.POST("/batch-check", handlers.BatchCheckPermissions)
+				permissions.GET("/all", handlers.GetUserAllPermissions)
 				permissions.GET("/policies", middleware.RequirePermission("permissions", "read"), handlers.GetPolicies)
 				permissions.POST("/policies", middleware.RequirePermission("permissions", "create"), handlers.AddPolicy)
 				permissions.DELETE("/policies", middleware.RequirePermission("permissions", "delete"), handlers.RemovePolicy)

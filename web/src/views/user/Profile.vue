@@ -374,11 +374,11 @@ onMounted(() => {
           <div class="px-6 py-2">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-lg font-semibold flex items-center">
-                <Fingerprint class="mr-2 h-5 w-5" />
+                <Fingerprint class="h-5 w-5" />
                 Passkey 管理
               </h3>
               <Button size="sm" @click="showAddCredentialDialog = true">
-                <Plus class="mr-2 h-4 w-4" />
+                <Plus class="h-4 w-4" />
                 添加 Passkey
               </Button>
             </div>
@@ -594,7 +594,7 @@ onMounted(() => {
             :disabled="!newCredentialName.trim() || addingCredential"
             @click="addCredential"
           >
-            <Loader2 v-if="addingCredential" class="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 v-if="addingCredential" class="h-4 w-4 animate-spin" />
             {{ addingCredential ? '添加中...' : '继续' }}
           </AlertDialogAction>
         </AlertDialogFooter>

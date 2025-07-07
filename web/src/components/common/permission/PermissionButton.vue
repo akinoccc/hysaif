@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { ButtonPermission } from '@/stores/permission'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { usePermission } from '@/composables/usePermission'
+import { usePermissionStore } from '@/stores/permission'
 
 interface Props {
   permission: ButtonPermission
@@ -11,7 +11,6 @@ interface Props {
   disabled?: boolean
   loading?: boolean
   fallbackVisible?: boolean // 权限检查失败时是否显示，默认为 false
-  useAsync?: boolean // 是否使用异步检查，默认为 true
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,86 +19,33 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   loading: false,
   fallbackVisible: false,
-  useAsync: true,
 })
 
-const { hasButtonPermission, checkPermission } = usePermission()
+const permissionStore = usePermissionStore()
 
-// 权限状态
-const hasPermission = ref(props.fallbackVisible)
-const isCheckingPermission = ref(false)
-
-/**
- * 检查权限
- */
-async function checkButtonPermission() {
-  if (!props.useAsync) {
-    // 同步检查
-    const result = hasButtonPermission(props.permission, false)
-    if (result instanceof Promise) {
-      hasPermission.value = props.fallbackVisible
-    }
-    else {
-      hasPermission.value = result
-    }
-    return
-  }
-
-  // 异步检查
-  isCheckingPermission.value = true
-  try {
-    const result = await checkPermission(
-      props.permission.resource,
-      props.permission.action,
-      props.fallbackVisible,
-    )
-    hasPermission.value = result
-  }
-  catch (error) {
-    console.error('权限检查失败:', error)
-    hasPermission.value = props.fallbackVisible
-  }
-  finally {
-    isCheckingPermission.value = false
-  }
-}
+// 使用同步权限检查
+const hasPermission = computed(() => {
+  return permissionStore.hasPermission(
+    props.permission.resource,
+    props.permission.action,
+    props.fallbackVisible,
+  )
+})
 
 // 计算最终的禁用状态
 const isDisabled = computed(() => {
-  return props.disabled || props.loading || isCheckingPermission.value || !hasPermission.value
+  return props.disabled || props.loading || !hasPermission.value
 })
 
 // 是否显示加载状态
 const showLoading = computed(() => {
-  return props.loading || isCheckingPermission.value
-})
-
-// 监听权限配置变化
-watch(
-  () => props.permission,
-  () => {
-    checkButtonPermission()
-  },
-  { deep: true },
-)
-
-// 监听异步模式变化
-watch(
-  () => props.useAsync,
-  () => {
-    checkButtonPermission()
-  },
-)
-
-// 组件挂载时检查权限
-onMounted(() => {
-  checkButtonPermission()
+  return props.loading
 })
 </script>
 
 <template>
   <Button
-    v-if="hasPermission || isCheckingPermission"
+    v-if="hasPermission"
     :variant="variant"
     :size="size"
     :disabled="isDisabled"

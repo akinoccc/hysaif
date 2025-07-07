@@ -117,19 +117,19 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
     {
       id: 'actions',
       header: '操作',
-      cell: async ({ row }) => {
+      cell: ({ row }) => {
         const item = row.original
         const permissionStore = usePermissionStore()
-        const hasDirectAccess = await permissionStore.hasPermission('secret', 'read')
-        const hasApprovedAccess = item.has_approved_access // 后端需要提供此字段
 
+        const hasDirectAccess = permissionStore.hasPermission('secret', 'update', false)
+        const hasApprovedAccess = item.has_approved_access
         const actions = []
 
         if (hasDirectAccess) {
           // 有直接访问权限的用户显示查看按钮
           actions.push(
             h(PermissionButton, {
-              permission: { resource: 'secret', action: 'read' },
+              permission: { resource: 'secret', action: 'update' },
               variant: 'ghost',
               size: 'sm',
               onClick: () => {

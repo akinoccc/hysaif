@@ -560,7 +560,7 @@ watch(
           <!-- 操作按钮 -->
           <div class="flex justify-end gap-3 pt-6">
             <Button type="button" variant="outline" size="lg" @click="handleClose">
-              <X class="h-4 w-4 mr-2" />
+              <X class="h-4 w-4" />
               取消
             </Button>
             <PermissionButton
@@ -570,7 +570,7 @@ watch(
               :disabled="loading"
               class="min-w-[100px]"
             >
-              <Save class="h-4 w-4 mr-2" />
+              <Save class="h-4 w-4" />
               {{ loading ? '保存中...' : '保存' }}
             </PermissionButton>
           </div>

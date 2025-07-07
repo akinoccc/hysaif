@@ -14,21 +14,23 @@ import {
   Users,
   XCircle,
 } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { type AccessRequest, accessRequestAPI, auditAPI, type AuditLog, type SecretItem, secretItemAPI, userAPI } from '@/api'
 import { PermissionButton } from '@/components'
 import { Card } from '@/components/ui/card'
-import { usePermission, useRole } from '@/composables'
 import { AUDIT_LOG_ACTION_MAP, AUDIT_LOG_RESOURCE_MAP } from '@/constants/auditLog'
 import { formatRelativeTime, getFileIcon } from '@/lib/utils'
+import { usePermissionStore } from '@/stores'
 import { useAuthStore } from '@/stores/auth'
 import { getActionColor } from './audit/helper'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { isAdmin, isSecurityManager, isDeveloper, isAuditor, hasPermission } = usePermission()
-const { currentRole, hasRole } = useRole()
+const { isAdmin, isSecurityManager, isDeveloper, isAuditor, currentRole } = storeToRefs(usePermissionStore())
+const { hasPermission, roleChecker } = usePermissionStore()
+const { hasRole } = roleChecker
 
 // 基础统计数据
 const stats = ref({
@@ -205,7 +207,7 @@ async function loadDevData() {
   try {
     if (canViewSecrets.value) {
       // 获取用户可访问的项目
-      const itemsResponse = await secretItemAPI.getItems({ page: 1, page_size: 5 })
+      const itemsResponse = await secretItemAPI.getAccessedItems({ page: 1, page_size: 5 })
       devStats.value.accessibleItems = itemsResponse.pagination?.total || 0
       recentItems.value = itemsResponse.data || []
     }
@@ -213,7 +215,7 @@ async function loadDevData() {
     if (canViewRequests.value) {
       // 获取用户的访问请求
       const requestsResponse = await accessRequestAPI.getRequests({ page: 1, page_size: 5 })
-      const userRequests = requestsResponse.data?.filter(req => req.applicant_id === authStore.user?.id) || []
+      const userRequests = requestsResponse.data?.filter(req => req.applicant.id === authStore.user?.id) || []
       devStats.value.myRequests = userRequests.length
       devStats.value.requestsApproved = userRequests.filter(req => req.status === 'approved').length
       recentRequests.value = userRequests
@@ -791,7 +793,7 @@ onMounted(() => {
               @click="router.push('/items')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -832,7 +834,7 @@ onMounted(() => {
         <div class="px-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold">
-              我的申请状态
+              我的申请
             </h3>
             <PermissionButton
               variant="ghost"
@@ -842,7 +844,7 @@ onMounted(() => {
               @click="router.push('/access_requests')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -852,9 +854,9 @@ onMounted(() => {
               class="flex items-center justify-between p-3 rounded-lg border border-border theme-transition"
             >
               <div class="flex items-center space-x-3">
-                <CheckCircle v-if="request.status === 'approved'" class="h-5 w-5 text-green-500" />
-                <Clock v-else-if="request.status === 'pending'" class="h-5 w-5 text-orange-500" />
-                <XCircle v-else class="h-5 w-5 text-red-500" />
+                <CheckCircle v-if="request.status === 'approved'" class="h-6 w-6 text-green-500" />
+                <Clock v-else-if="request.status === 'pending'" class="h-6 w-6 text-orange-500" />
+                <XCircle v-else class="h-6 w-6 text-red-500" />
                 <div>
                   <p class="font-medium">
                     {{ request.secret_item?.name }}

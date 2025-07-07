@@ -109,7 +109,7 @@ function handleCancel() {
             取消
           </Button>
           <Button type="submit" :disabled="loading || !form.reason.trim()">
-            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 v-if="loading" class="h-4 w-4 animate-spin" />
             提交申请
           </Button>
         </div>

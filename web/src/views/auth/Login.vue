@@ -224,7 +224,7 @@ async function handlePasskeyLogin() {
                     :disabled="loading"
                     class="w-full h-11 bg-gradient-to-r from-primary to-primary hover:from-primary/90 hover:to-primary/90 text-primary-foreground font-medium shadow-lg shadow-primary/25 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 v-if="loading" class="h-4 w-4 animate-spin" />
                     {{ loading ? '登录中...' : '登录系统' }}
                   </Button>
 
@@ -246,8 +246,8 @@ async function handlePasskeyLogin() {
                     class="w-full h-11"
                     @click="handlePasskeyLogin"
                   >
-                    <Loader2 v-if="passkeyLoading" class="mr-2 h-4 w-4 animate-spin" />
-                    <Fingerprint v-else class="mr-2 h-4 w-4" />
+                    <Loader2 v-if="passkeyLoading" class="h-4 w-4 animate-spin" />
+                    <Fingerprint v-else class="h-4 w-4" />
                     {{ passkeyLoading ? '验证中...' : '使用 Passkey 登录' }}
                   </Button>
                 </div>

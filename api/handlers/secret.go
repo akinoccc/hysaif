@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/types"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
@@ -174,14 +176,36 @@ func CreateSecretItem(c *gin.Context) {
 func GetSecretItem(c *gin.Context) {
 	id := c.Param("id")
 
+	user := context.GetCurrentUser(c)
+	var approvedRequests []models.AccessRequest
+	now := uint64(time.Now().UnixMilli())
+	err := models.DB.Where(`secret_item_id IN (?) AND applicant_id = ? AND status = ? AND ? BETWEEN valid_from AND valid_until`,
+		id, user.ID, models.RequestStatusApproved, now).
+		Find(&approvedRequests).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
+		return
+	}
+
 	var item models.SecretItem
-	if err := models.DB.
+	query := models.DB.
 		Preload("Creator").
 		Preload("Updater").
-		Where("id = ?", id).
+		Where("id = ?", id)
+
+	if len(approvedRequests) == 0 {
+		query = query.Where("created_by_id = ?", user.ID)
+	}
+
+	if err := query.
 		First(&item).
 		Error; err != nil {
-		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "信息项不存在"})
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusForbidden, types.ErrorResponse{Error: "你无法访问此信息项"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "信息项不存在"})
 		return
 	}
 
@@ -254,4 +278,47 @@ func DeleteSecretItem(c *gin.Context) {
 	middleware.AuditLog(types.AuditLogActionDelete, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusOK, types.MessageResponse{Message: "删除成功"})
+}
+
+// GetAccessedSecretItems 获取用户有访问权限的信息项
+func GetAccessedSecretItems(c *gin.Context) {
+	user := context.GetCurrentUser(c)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+
+	offset := (page - 1) * pageSize
+
+	var approvedSecretIDs []string
+	now := uint64(time.Now().UnixMilli())
+	err := models.DB.Model(&models.AccessRequest{}).Where(`applicant_id = ? AND status = ? AND ? BETWEEN valid_from AND valid_until`,
+		user.ID, models.RequestStatusApproved, now).Pluck("secret_item_id", &approvedSecretIDs).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
+		return
+	}
+
+	query := models.DB.Model(&models.SecretItem{}).Where("id IN (?)", approvedSecretIDs)
+
+	var total int64
+	query.Count(&total)
+
+	var items []models.SecretItem
+	if err := query.
+		Offset(offset).
+		Limit(pageSize).
+		Find(&items).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, types.ListResponse[models.SecretItem]{
+		Data: items,
+		Pagination: types.Pagination{
+			Page:       page,
+			PageSize:   pageSize,
+			Total:      int(total),
+			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
+		},
+	})
 }

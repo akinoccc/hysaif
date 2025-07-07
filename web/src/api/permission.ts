@@ -20,6 +20,28 @@ export interface PermissionData {
 
 export interface PermissionResponse extends ApiResponse<PermissionData> {}
 
+// 批量权限检查请求接口
+export interface BatchPermissionRequest {
+  permissions: PermissionRequest[]
+}
+
+// 批量权限检查响应数据接口
+export interface BatchPermissionData {
+  results: Record<string, boolean>
+}
+
+// 批量权限检查响应接口
+export interface BatchPermissionResponse extends ApiResponse<BatchPermissionData> {}
+
+// 用户所有权限响应数据接口
+export interface UserAllPermissionsData {
+  role: string
+  permissions: Record<string, boolean>
+}
+
+// 用户所有权限响应接口
+export interface UserAllPermissionsResponse extends ApiResponse<UserAllPermissionsData> {}
+
 export interface PolicyData {
   policies: string[][]
 }
@@ -79,6 +101,24 @@ export const permissionAPI = {
   checkPermission: (role: string, resource: string, action: string): ApiMethod<PermissionResponse> => {
     const data: PermissionRequest = { role, resource, action }
     return api.post('/permissions/check', data)
+  },
+
+  /**
+   * 批量检查权限
+   * @param permissions 权限列表
+   * @returns 批量权限检查结果
+   */
+  batchCheckPermissions: (permissions: PermissionRequest[]): ApiMethod<BatchPermissionResponse> => {
+    const data: BatchPermissionRequest = { permissions }
+    return api.post('/permissions/batch-check', data)
+  },
+
+  /**
+   * 获取用户所有权限
+   * @returns 用户所有权限
+   */
+  getUserAllPermissions: (): ApiMethod<UserAllPermissionsResponse> => {
+    return api.get('/permissions/all')
   },
 
   /**
