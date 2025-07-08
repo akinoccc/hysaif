@@ -47,162 +47,44 @@
 ```mermaid
 graph TB
     %% 客户端层
-    subgraph "客户端层"
-        Web[Web前端]
-        Mobile[移动端]
-        API_Client[API客户端]
+    Client[前端应用<br/>Vue.js]
+    
+    %% API服务层
+    subgraph "API服务层 (Go)"
+        API[RESTful API<br/>Gin框架]
+        Auth[认证中间件<br/>JWT + WebAuthn]
+        RBAC[权限控制<br/>Casbin RBAC]
     end
-
-    %% HTTP层
-    subgraph "HTTP服务层"
-        Gin[Gin Web框架]
-        Router[路由管理]
+    
+    %% 业务逻辑层
+    subgraph "业务逻辑层"
+        SecretMgr[密钥管理]
+        UserMgr[用户管理]
+        RequestMgr[访问申请]
+        NotifyMgr[通知系统]
     end
-
-    %% 中间件层
-    subgraph "中间件层"
-        Auth[JWT认证]
-        RBAC[Casbin权限控制]
-        Audit[审计日志]
-        Logger[请求日志]
-        Recovery[错误恢复]
-    end
-
-    %% 业务处理层
-    subgraph "业务处理层 (Handlers)"
-        AuthHandler[认证处理器]
-        UserHandler[用户管理]
-        SecretHandler[密钥管理]
-        RequestHandler[访问申请]
-        NotifyHandler[通知管理]
-        PermissionHandler[权限管理]
-        AuditHandler[审计日志]
-    end
-
-    %% 核心服务层
-    subgraph "核心服务层 (Packages)"
-        WebAuthn[WebAuthn认证服务]
-        CryptoSvc[加密服务]
-        NotificationSvc[通知服务]
-        PermissionSvc[权限管理服务]
-        Context[上下文管理]
-    end
-
-    %% 数据模型层
-    subgraph "数据模型层 (Models)"
-        UserModel[User<br/>用户模型]
-        SecretModel[SecretItem<br/>密钥模型]
-        RequestModel[AccessRequest<br/>访问申请模型]
-        NotificationModel[Notification<br/>通知模型]
-        AuditModel[AuditLog<br/>审计日志模型]
-        CredentialModel[WebAuthnCredential<br/>认证凭证模型]
-    end
-
-    %% 外部服务层
-    subgraph "外部服务层"
-        Vault[HashiCorp Vault<br/>企业级加密]
-        Scheduler[定时任务调度器<br/>过期检查/通知]
-    end
-
-    %% 数据存储层
+    
+    %% 数据层
     subgraph "数据存储层"
-        DB[(数据库<br/>PostgreSQL/MySQL/SQLite)]
-        CasbinDB[(Casbin策略存储)]
+        DB[(关系数据库<br/>PostgreSQL/MySQL/SQLite)]
+        Vault[HashiCorp Vault/OpenBao<br/>企业级加密]
     end
-
+    
     %% 连接关系
-    Web --> Gin
-    Mobile --> Gin
-    API_Client --> Gin
-    
-    Gin --> Router
-    Router --> Auth
+    Client --> API
+    API --> Auth
     Auth --> RBAC
-    RBAC --> Audit
-    Audit --> Logger
-    Logger --> Recovery
+    RBAC --> SecretMgr
+    RBAC --> UserMgr
+    RBAC --> RequestMgr
+    RBAC --> NotifyMgr
     
-    Recovery --> AuthHandler
-    Recovery --> UserHandler
-    Recovery --> SecretHandler
-    Recovery --> RequestHandler
-    Recovery --> NotifyHandler
-    Recovery --> PermissionHandler
-    Recovery --> AuditHandler
-    
-    AuthHandler --> WebAuthn
-    UserHandler --> Context
-    SecretHandler --> CryptoSvc
-    RequestHandler --> NotificationSvc
-    NotifyHandler --> NotificationSvc
-    PermissionHandler --> PermissionSvc
-    AuditHandler --> Context
-    
-    WebAuthn --> UserModel
-    CryptoSvc --> Vault
-    NotificationSvc --> Scheduler
-    PermissionSvc --> CasbinDB
-    
-    UserModel --> DB
-    SecretModel --> DB
-    RequestModel --> DB
-    NotificationModel --> DB
-    AuditModel --> DB
-    CredentialModel --> DB
-    
-    %% 数据模型关系
-    UserModel -.->|创建者/更新者| SecretModel
-    UserModel -.->|申请人/审批人| RequestModel
-    UserModel -.->|接收者| NotificationModel
-    UserModel -.->|操作者| AuditModel
-    UserModel -.->|拥有者| CredentialModel
-    SecretModel -.->|被申请项| RequestModel
+    SecretMgr --> Vault
+    SecretMgr --> DB
+    UserMgr --> DB
+    RequestMgr --> DB
+    NotifyMgr --> DB
 ```
-
-### 🔧 核心架构组件
-
-#### 🌐 HTTP服务层
-- **Gin Web框架**：高性能HTTP服务器，提供RESTful API接口
-- **路由管理**：模块化路由设计，支持中间件链式处理
-
-#### 🛡️ 中间件层
-- **JWT认证**：基于JWT的无状态用户身份验证
-- **Casbin权限控制**：基于RBAC的细粒度权限管理
-- **审计日志**：完整的操作审计追踪
-- **请求日志**：HTTP请求日志记录和性能监控
-- **错误恢复**：优雅的错误处理和服务恢复
-
-#### 📋 业务处理层 (Handlers)
-- **认证处理器**：用户登录、WebAuthn认证、令牌管理
-- **用户管理**：用户CRUD、角色管理、权限分配
-- **密钥管理**：多类型密钥的安全管理（API密钥、SSH密钥、密码等）
-- **访问申请**：完整的申请审批工作流
-- **通知管理**：系统通知和消息推送
-- **权限管理**：动态权限配置和检查
-- **审计日志**：操作日志查询和分析
-
-#### ⚙️ 核心服务层 (Packages)
-- **WebAuthn认证服务**：硬件安全密钥和生物识别支持
-- **加密服务**：Vault + AES混合加密策略，智能回退机制
-- **通知服务**：异步通知和模板管理
-- **权限管理服务**：Casbin集成和策略管理
-- **上下文管理**：请求上下文和用户信息管理
-
-#### 📊 数据模型层 (Models)
-- **User**：用户基础信息、角色权限、认证数据
-- **SecretItem**：多类型敏感信息安全存储
-- **AccessRequest**：访问申请和审批流程管理
-- **Notification**：通知消息和状态管理
-- **AuditLog**：操作审计和日志记录
-- **WebAuthnCredential**：WebAuthn认证凭证管理
-
-#### 🔐 外部服务层
-- **HashiCorp Vault**：企业级密钥管理和加密服务
-- **定时任务调度器**：过期检查、通知推送等异步任务
-
-#### 💾 数据存储层
-- **主数据库**：支持PostgreSQL、MySQL、SQLite多种数据库
-- **Casbin策略存储**：权限策略和角色配置存储
 
 ## 🚀 快速开始
 
@@ -319,7 +201,7 @@ SIMS_VAULT_TOKEN=vault-token
 SIMS_VAULT_KEY_NAME=hysaif-encrypt-key
 ```
 
-### OpenBao 配置
+### OpenBao/HashiCorp Vault 配置
 
 ```bash
 # 启用 Transit 引擎
@@ -455,6 +337,7 @@ docker compose up -d
 - [Gin](https://gin-gonic.com/) - 高性能 Go Web 框架
 - [Casbin](https://casbin.org/) - 权限管理框架
 - [OpenBao](https://www.openbao.org/) - 密钥管理工具
+- [HashiCorp Vault](https://developer.hashicorp.com/vault/) - 密钥管理工具
 - [WebAuthn](https://webauthn.io/) - Web 认证标准
 
 ## 📞 联系我们
