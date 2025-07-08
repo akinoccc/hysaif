@@ -31,6 +31,7 @@ type SecurityConfig struct {
 	EncryptionKey string         `json:"encryption_key"`
 	JWTSecret     string         `json:"jwt_secret"`
 	WebAuthn      WebAuthnConfig `json:"webauthn"`
+	Vault         VaultConfig    `json:"vault"`
 }
 
 // WebAuthnConfig WebAuthn 配置
@@ -44,6 +45,25 @@ type WebAuthnConfig struct {
 type ServerConfig struct {
 	Port int    `json:"port"`
 	Host string `json:"host"`
+}
+
+// VaultConfig Vault配置
+type VaultConfig struct {
+	Enabled   bool           `json:"enabled"`             // 是否启用Vault加密
+	Address   string         `json:"address"`             // Vault服务器地址
+	Token     string         `json:"token"`               // Vault访问令牌
+	KeyName   string         `json:"key_name"`            // Transit引擎中的密钥名称
+	MountPath string         `json:"mount_path"`          // Transit引擎挂载路径，默认为"transit"
+	Namespace string         `json:"namespace,omitempty"` // Vault命名空间（企业版功能）
+	TLSConfig VaultTLSConfig `json:"tls_config"`          // TLS配置
+}
+
+// VaultTLSConfig Vault TLS配置
+type VaultTLSConfig struct {
+	Insecure   bool   `json:"insecure"`    // 是否跳过TLS验证（仅用于开发环境）
+	CACert     string `json:"ca_cert"`     // CA证书路径
+	ClientCert string `json:"client_cert"` // 客户端证书路径
+	ClientKey  string `json:"client_key"`  // 客户端私钥路径
 }
 
 // AppConfig 全局配置实例
@@ -98,6 +118,48 @@ func loadFromEnv() {
 
 	if dbName := os.Getenv("SIMS_DB_NAME"); dbName != "" {
 		AppConfig.Database.Database = dbName
+	}
+
+	// Vault相关环境变量
+	if vaultEnabled := os.Getenv("SIMS_VAULT_ENABLED"); vaultEnabled != "" {
+		AppConfig.Security.Vault.Enabled = vaultEnabled == "true"
+	}
+
+	if vaultAddress := os.Getenv("SIMS_VAULT_ADDRESS"); vaultAddress != "" {
+		AppConfig.Security.Vault.Address = vaultAddress
+	}
+
+	if vaultToken := os.Getenv("SIMS_VAULT_TOKEN"); vaultToken != "" {
+		AppConfig.Security.Vault.Token = vaultToken
+	}
+
+	if vaultKeyName := os.Getenv("SIMS_VAULT_KEY_NAME"); vaultKeyName != "" {
+		AppConfig.Security.Vault.KeyName = vaultKeyName
+	}
+
+	if vaultMountPath := os.Getenv("SIMS_VAULT_MOUNT_PATH"); vaultMountPath != "" {
+		AppConfig.Security.Vault.MountPath = vaultMountPath
+	}
+
+	if vaultNamespace := os.Getenv("SIMS_VAULT_NAMESPACE"); vaultNamespace != "" {
+		AppConfig.Security.Vault.Namespace = vaultNamespace
+	}
+
+	// Vault TLS配置
+	if vaultInsecure := os.Getenv("SIMS_VAULT_TLS_INSECURE"); vaultInsecure != "" {
+		AppConfig.Security.Vault.TLSConfig.Insecure = vaultInsecure == "true"
+	}
+
+	if vaultCACert := os.Getenv("SIMS_VAULT_CA_CERT"); vaultCACert != "" {
+		AppConfig.Security.Vault.TLSConfig.CACert = vaultCACert
+	}
+
+	if vaultClientCert := os.Getenv("SIMS_VAULT_CLIENT_CERT"); vaultClientCert != "" {
+		AppConfig.Security.Vault.TLSConfig.ClientCert = vaultClientCert
+	}
+
+	if vaultClientKey := os.Getenv("SIMS_VAULT_CLIENT_KEY"); vaultClientKey != "" {
+		AppConfig.Security.Vault.TLSConfig.ClientKey = vaultClientKey
 	}
 }
 

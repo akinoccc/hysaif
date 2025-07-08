@@ -16,6 +16,20 @@
       "rp_display_name": "企业敏感信息管理系统",
       "rp_id": "localhost",
       "rp_origins": ["http://localhost:5173", "http://localhost:8080"]
+    },
+    "vault": {
+      "enabled": false,
+      "address": "https://vault.example.com:8200",
+      "token": "your-vault-token-here",
+      "key_name": "sims-encrypt-key",
+      "mount_path": "transit",
+      "namespace": "",
+      "tls_config": {
+        "insecure": false,
+        "ca_cert": "/path/to/ca.crt",
+        "client_cert": "/path/to/client.crt",
+        "client_key": "/path/to/client.key"
+      }
     }
   },
   "server": {
