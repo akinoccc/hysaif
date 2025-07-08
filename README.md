@@ -67,7 +67,7 @@ graph TB
     %% 数据层
     subgraph "数据存储层"
         DB[(关系数据库<br/>PostgreSQL/MySQL/SQLite)]
-        Vault[HashiCorp Vault/OpenBao<br/>企业级加密]
+        Vault[HashiCorp Vault/OpenBao<br/>企业级加解密]
     end
     
     %% 连接关系
@@ -80,6 +80,7 @@ graph TB
     RBAC --> NotifyMgr
     
     SecretMgr --> Vault
+    Vault --> SecretMgr
     SecretMgr --> DB
     UserMgr --> DB
     RequestMgr --> DB
