@@ -236,7 +236,7 @@ onMounted(() => {
       @button-click="handleCreateRequest"
     />
 
-    <Card class="border-none shadow-sm bg-gradient-to-br from-background to-muted/30">
+    <Card>
       <CardContent class="px-6 space-y-6">
         <!-- 筛选和搜索 -->
         <DataFilter

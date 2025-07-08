@@ -190,6 +190,13 @@ defineExpose({
             </div>
 
             <div class="space-y-2">
+              <Label class="text-sm font-medium text-muted-foreground">环境</Label>
+              <p class="text-sm">
+                {{ item.environment || '无' }}
+              </p>
+            </div>
+
+            <div class="space-y-2">
               <Label class="text-sm font-medium text-muted-foreground">标签</Label>
               <div class="flex flex-wrap gap-2">
                 <template v-if="item.tags && item.tags.length > 0">

@@ -152,6 +152,7 @@ func CreateSecretItem(c *gin.Context) {
 		Description: req.Description,
 		Type:        req.Type,
 		Category:    req.Category,
+		Environment: req.Environment,
 		Tags:        req.Tags,
 		Data:        &req.Data,
 		ExpiresAt:   req.ExpiresAt,
@@ -238,6 +239,7 @@ func UpdateSecretItem(c *gin.Context) {
 	item.Description = req.Description
 	item.Type = req.Type
 	item.Category = req.Category
+	item.Environment = req.Environment
 	item.Tags = req.Tags
 	item.Data = &req.Data // 这里会触发自定义序列化器
 	item.ExpiresAt = req.ExpiresAt

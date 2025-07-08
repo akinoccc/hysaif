@@ -131,6 +131,35 @@ const availableGroups = computed(() => {
       </FormItem>
     </FormField>
 
+    <!-- 环境 -->
+    <FormField v-slot="{ componentField }" name="environment">
+      <FormItem>
+        <FormLabel>环境</FormLabel>
+      </FormItem>
+      <FormControl>
+        <Select v-bind="componentField">
+          <SelectTrigger>
+            <SelectValue placeholder="选择环境" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="production">
+              生产环境
+            </SelectItem>
+            <SelectItem value="test">
+              测试环境
+            </SelectItem>
+            <SelectItem value="dev">
+              开发环境
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </FormControl>
+      <FormDescription>
+        选择{{ typeInfo.label }}所属的环境
+      </FormDescription>
+      <FormMessage />
+    </FormField>
+
     <!-- 标签 -->
     <FormField name="tags">
       <FormItem>

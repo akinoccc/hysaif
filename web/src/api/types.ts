@@ -157,6 +157,7 @@ export interface SecretBaseInfo {
   name: string
   description?: string
   type: string
+  environment?: string
   category?: string
   tags?: string[]
   expires_at?: number

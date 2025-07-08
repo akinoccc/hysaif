@@ -64,7 +64,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -105,8 +105,8 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.145 0 0);
+  --destructive: oklch(0.55 0.229 25.723);
+  --destructive-foreground: oklch(0.98 0.141 25.723);
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
   --ring: oklch(0.439 0 0);
@@ -160,55 +160,6 @@
 }
 
 @layer components {
-  /* 自定义工具类 */
-  .text-warning {
-    color: hsl(var(--warning));
-  }
-  
-  .text-warning-foreground {
-    color: hsl(var(--warning-foreground));
-  }
-  
-  .bg-warning {
-    background-color: hsl(var(--warning));
-  }
-  
-  .bg-warning-foreground {
-    background-color: hsl(var(--warning-foreground));
-  }
-  
-  .text-success {
-    color: hsl(var(--success));
-  }
-  
-  .text-success-foreground {
-    color: hsl(var(--success-foreground));
-  }
-  
-  .bg-success {
-    background-color: hsl(var(--success));
-  }
-  
-  .bg-success-foreground {
-    background-color: hsl(var(--success-foreground));
-  }
-  
-  .text-info {
-    color: hsl(var(--info));
-  }
-  
-  .text-info-foreground {
-    color: hsl(var(--info-foreground));
-  }
-  
-  .bg-info {
-    background-color: hsl(var(--info));
-  }
-  
-  .bg-info-foreground {
-    background-color: hsl(var(--info-foreground));
-  }
-
   /* 渐变背景适配 */
   .gradient-bg-light {
     @apply bg-gradient-to-br from-slate-50 to-slate-100;
@@ -237,19 +188,19 @@
 
   /* 状态指示器 */
   .status-active {
-    @apply bg-success text-success-foreground;
+    @apply bg-success text-gray-50;
   }
   
   .status-warning {
-    @apply bg-warning text-warning-foreground;
+    @apply bg-warning text-gray-50;
   }
     
   .status-error {
-    @apply bg-destructive text-destructive-foreground;
+    @apply bg-destructive text-gray-50;
   }
   
   .status-info {
-    @apply bg-info text-info-foreground;
+    @apply bg-info text-gray-50;
   }
 
   /* 代码块适配 */

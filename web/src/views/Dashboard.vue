@@ -191,7 +191,7 @@ async function loadSecurityData() {
 
     if (canViewAudit.value) {
       const today = new Date().toISOString().split('T')[0]
-      const logsResponse = await auditAPI.getLogs({ page: 1, page_size: 50 })
+      const logsResponse = await auditAPI.getLogs({ page: 1, page_size: 10 })
       securityStats.value.securityAlerts = logsResponse.data?.filter((log: AuditLog) =>
         log.created_at.startsWith(today) && (log.action === 'delete' || log.action === 'create'),
       ).length || 0
@@ -596,7 +596,7 @@ onMounted(() => {
               @click="router.push('/users')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -646,7 +646,7 @@ onMounted(() => {
               @click="router.push('/access_requests')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -697,7 +697,7 @@ onMounted(() => {
               @click="router.push('/access_requests')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -747,7 +747,7 @@ onMounted(() => {
               @click="router.push('/audit')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -901,7 +901,7 @@ onMounted(() => {
               @click="router.push('/audit')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -952,7 +952,7 @@ onMounted(() => {
               @click="router.push('/items')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">
@@ -1004,7 +1004,7 @@ onMounted(() => {
               @click="router.push('/audit')"
             >
               查看全部
-              <ArrowRight class="ml-2 h-4 w-4" />
+              <ArrowRight class="h-4 w-4" />
             </PermissionButton>
           </div>
           <div class="space-y-3">

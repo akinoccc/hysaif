@@ -385,7 +385,7 @@ onMounted(() => {
 
             <div v-if="loadingCredentials" class="flex items-center justify-center py-4">
               <Loader2 class="h-5 w-5 animate-spin" />
-              <span class="ml-2 text-sm">加载中...</span>
+              <span class="text-sm">加载中...</span>
             </div>
 
             <div v-else-if="credentials.length === 0" class="text-center py-8 text-muted-foreground">
@@ -444,7 +444,7 @@ onMounted(() => {
 
             <div v-if="loadingHistory" class="flex items-center justify-center py-4">
               <Loader2 class="h-5 w-5 animate-spin" />
-              <span class="ml-2 text-sm">加载中...</span>
+              <span class="text-sm">加载中...</span>
             </div>
 
             <div v-else-if="loginHistory.length === 0" class="text-center py-4 text-muted-foreground">
@@ -491,7 +491,7 @@ onMounted(() => {
       <div class="space-y-6">
         <!-- 账户信息 -->
         <Card>
-          <div class="px-6 py-2">
+          <div class="px-6">
             <h3 class="text-lg font-semibold mb-4">
               账户信息
             </h3>
@@ -518,7 +518,7 @@ onMounted(() => {
 
         <!-- 安全设置 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6">
             <h3 class="text-lg font-semibold mb-4 flex items-center">
               <Shield class=" h-5 w-5 text-blue-500" />
               安全设置
@@ -554,7 +554,7 @@ onMounted(() => {
 
         <!-- 安全提醒 -->
         <Card>
-          <div class="p-6">
+          <div class="px-6">
             <h3 class="text-lg font-semibold mb-4 flex items-center">
               <AlertTriangle class=" h-5 w-5 text-orange-500" />
               安全提醒

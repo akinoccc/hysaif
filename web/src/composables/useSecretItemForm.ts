@@ -131,6 +131,7 @@ export function useSecretItemForm(itemType: string) {
       name: z.string().min(1, '请输入名称'),
       description: z.string().optional(),
       category: z.string().optional(),
+      environment: z.string().optional(),
       tags: z.array(z.string()).optional(),
       expires_at: z.number().optional(),
       data: dataSchema,
@@ -144,6 +145,7 @@ export function useSecretItemForm(itemType: string) {
       name: '',
       description: '',
       category: '',
+      environment: '',
       tags: [],
       expires_at: undefined,
       data: initialData,
@@ -156,6 +158,7 @@ export function useSecretItemForm(itemType: string) {
       name: form.values.name,
       description: form.values.description,
       category: form.values.category,
+      environment: form.values.environment,
       tags: form.values.tags,
       expires_at: form.values.expires_at,
     }),
@@ -163,6 +166,7 @@ export function useSecretItemForm(itemType: string) {
       form.setFieldValue('name', value.name)
       form.setFieldValue('description', value.description)
       form.setFieldValue('category', value.category)
+      form.setFieldValue('environment', value.environment)
       form.setFieldValue('tags', value.tags)
       form.setFieldValue('expires_at', value.expires_at)
     },
@@ -241,6 +245,7 @@ export function useSecretItemForm(itemType: string) {
         name: item.name,
         description: item.description,
         category: item.category,
+        environment: item.environment,
         tags: item.tags || [],
         expires_at: item.expires_at,
         data: itemData,
@@ -264,6 +269,7 @@ export function useSecretItemForm(itemType: string) {
         description: values.description,
         type: itemType,
         category: values.category,
+        environment: values.environment,
         tags: values.tags,
         expires_at: values.expires_at,
         data: values.data,

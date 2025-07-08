@@ -66,6 +66,26 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
         }, label || '未分类')
       },
     },
+    // 环境列
+    {
+      accessorKey: 'environment',
+      header: '环境',
+      cell: ({ row }) => {
+        const environment = row.getValue('environment') as string
+        return h('span', {
+          class: `
+            inline-flex
+            items-center
+            px-2.5
+            py-0.5
+            rounded-full
+            text-xs
+            font-medium
+            ${environment ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}
+          `,
+        }, environment || '无')
+      },
+    },
     // 状态列
     {
       id: 'status',

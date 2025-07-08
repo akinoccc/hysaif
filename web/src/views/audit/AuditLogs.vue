@@ -244,7 +244,7 @@ onMounted(() => {
         <!-- 日志列表 -->
         <div v-if="loading" class="flex items-center justify-center py-8">
           <Loader2 class="h-6 w-6 animate-spin" />
-          <span class="ml-2">加载中...</span>
+          <span class="">加载中...</span>
         </div>
 
         <EmptyState

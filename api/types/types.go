@@ -121,6 +121,7 @@ type PostItemRequest struct {
 	Type        string                `json:"type"` // password, api_key, access_key, ssh_key, certificate, token, custom
 	Description string                `json:"description,omitempty"`
 	Category    string                `json:"category"`
+	Environment string                `json:"environment"`
 	Tags        []string              `json:"tags,omitempty" gorm:"type:text;serializer:json"`
 	Data        models.SecretItemData `json:"data,omitempty" gorm:"type:text;serializer:json"`
 	ExpiresAt   uint64                `json:"expires_at,omitempty"`
