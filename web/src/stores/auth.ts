@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const setAuth = (t: string, u: User) => {
+  const setAuth = (t: string, u: User | null) => {
     token.value = t
     user.value = u
   }

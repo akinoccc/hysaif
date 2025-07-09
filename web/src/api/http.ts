@@ -1,6 +1,6 @@
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 import { useAuthStore } from '@/stores/auth'
 
 const API_BASE_URL = '/api/v1'
@@ -34,12 +34,11 @@ api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response.data
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     if (error.response?.status === 401) {
       const authStore = useAuthStore()
-      authStore.logout()
-      const router = useRouter()
-      router.push('/login')
+      authStore.setAuth('', null)
+      await router.push('/login')
       return Promise.reject(error)
     }
     return Promise.reject(error)

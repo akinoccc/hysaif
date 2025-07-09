@@ -44,7 +44,7 @@ function checkPermission(el: HTMLElement, binding: any) {
   }
 
   const { resource, action, mode = 'hide', fallback = false } = value
-  const hasPermission = permissionStore.hasPermissionSync(resource, action, fallback)
+  const hasPermission = permissionStore.hasPermission(resource, action, fallback)
 
   if (!hasPermission) {
     if (mode === 'disable') {

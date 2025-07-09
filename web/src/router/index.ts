@@ -376,7 +376,8 @@ router.beforeEach(async (to, _, next) => {
       try {
         await permissionStore.initializePermissions()
         console.log('路由守卫中权限缓存初始化完成')
-      } catch (error) {
+      }
+      catch (error) {
         console.error('路由守卫中权限缓存初始化失败:', error)
       }
     }
