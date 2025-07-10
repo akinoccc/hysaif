@@ -362,7 +362,7 @@ func GetUserAllPermissions(c *gin.Context) {
 		{Role: user.Role, Resource: "notification", Action: "bulk_send"},
 		{Role: user.Role, Resource: "notification", Action: "view_templates"},
 
-		// 自定义资源权限
+		// KV 键值对资源权限
 		{Role: user.Role, Resource: "custom", Action: "read"},
 		{Role: user.Role, Resource: "custom", Action: "create"},
 		{Role: user.Role, Resource: "custom", Action: "update"},
@@ -440,7 +440,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 		{Path: "/ssh_key", Title: "SSH密钥", Icon: "Terminal", Order: 8},
 		{Path: "/password", Title: "密码", Icon: "Lock", Order: 9},
 		{Path: "/token", Title: "令牌", Icon: "Coins", Order: 10},
-		{Path: "/custom", Title: "自定义", Icon: "Settings", Order: 11},
+		{Path: "/custom", Title: "KV 键值对", Icon: "Braces", Order: 11},
 	}
 
 	// 定义菜单权限映射 - 移除静态角色列表，只保留资源和动作映射

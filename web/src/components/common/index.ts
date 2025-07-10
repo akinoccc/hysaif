@@ -10,11 +10,6 @@ export * from './form-card'
 // 基础布局组件
 export * from './layout'
 
-// 布局相关组件
-export { default as Layout } from './Layout.vue'
-
-export { default as NavUser } from './NavUser.vue'
-
 // 权限组件
 export * from './permission'
 

@@ -238,7 +238,7 @@ defineExpose({
 
       <!-- 密钥信息 -->
       <Card>
-        <CardHeader>
+        <CardHeader class="flex items-center justify-between">
           <CardTitle class="flex items-center gap-1">
             <component :is="secretDataIcon" class=" h-5 w-5" />
             {{ secretDataTitle }}

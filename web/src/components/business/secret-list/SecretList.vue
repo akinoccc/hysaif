@@ -85,18 +85,18 @@ const typeInfo = computed(() => {
       emptyTitle: '暂无访问密钥',
       emptyDescription: '开始创建您的第一个访问密钥',
     },
-    [SECRET_ITEM_TYPE.Custom]: {
-      title: '自定义密钥管理',
-      description: '管理您的自定义密钥和配置',
-      searchPlaceholder: '自定义密钥名称、描述',
-      createButtonText: '新建自定义密钥',
-      emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Custom].icon,
-      emptyTitle: '暂无自定义密钥',
-      emptyDescription: '开始创建您的第一个自定义密钥',
+    [SECRET_ITEM_TYPE.KV]: {
+      title: 'KV 键值对管理',
+      description: '管理您的 KV 键值对',
+      searchPlaceholder: 'KV 键值对名称、描述',
+      createButtonText: '新建 KV 键值对',
+      emptyIcon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.KV].icon,
+      emptyTitle: '暂无 KV 键值对',
+      emptyDescription: '开始创建您的第一个 KV 键值对',
     },
   }
 
-  return typeInfoMap[props.secretType] || typeInfoMap[SECRET_ITEM_TYPE.Custom]
+  return typeInfoMap[props.secretType] || typeInfoMap[SECRET_ITEM_TYPE.KV]
 })
 
 // 根据类型获取列定义

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   Bell,
+  Braces,
   Coins,
   FileText,
   Key,
@@ -8,7 +9,6 @@ import {
   LayoutDashboard,
   Lock,
   Moon,
-  Settings,
   Shield,
   Sun,
   Terminal,
@@ -29,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { useTheme } from '@/composables/useTheme'
 import { useAuthStore } from '@/stores/auth'
@@ -53,7 +54,7 @@ const iconMap = {
   Terminal,
   Lock,
   Coins,
-  Settings,
+  Braces,
   Bell,
 }
 
@@ -143,6 +144,7 @@ watch(() => authStore.isAuthenticated, () => {
           <SidebarMenuItem
             v-for="item in menuItems" :key="item.path"
           >
+            <SidebarMenuSkeleton />
             <SidebarMenuButton
               class="h-fit py-0 theme-transition"
               :is-active="isMenuActive(item.path, route.path)"
@@ -164,12 +166,15 @@ watch(() => authStore.isAuthenticated, () => {
         <NavUser />
       </SidebarFooter>
     </Sidebar>
+
+    <SidebarTrigger class="absolute top-0 left-0 z-1 md:relative" />
+
     <!-- 主要内容区域 -->
     <SidebarInset class="theme-transition">
       <!-- 主要内容 -->
-      <main class="p-6">
+      <div class="p-6">
         <router-view />
-      </main>
+      </div>
     </SidebarInset>
   </SidebarProvider>
 </template>

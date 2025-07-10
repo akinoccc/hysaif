@@ -2,7 +2,6 @@ package notification
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"text/template"
 	"time"
@@ -83,9 +82,6 @@ func CreateNotification(recipientID, notificationType, relatedID, relatedType st
 		return fmt.Errorf("渲染内容失败: %v", err)
 	}
 
-	// 序列化元数据
-	metadataBytes, _ := json.Marshal(data)
-
 	// 创建通知记录
 	notification := models.Notification{
 		RecipientID: recipientID,
@@ -96,7 +92,7 @@ func CreateNotification(recipientID, notificationType, relatedID, relatedType st
 		Priority:    template.Priority,
 		RelatedID:   relatedID,
 		RelatedType: relatedType,
-		Metadata:    string(metadataBytes),
+		Metadata:    data,
 	}
 
 	// 设置过期时间（默认30天）
@@ -299,7 +295,13 @@ func GetUserNotifications(userID string, page, pageSize int, status string) ([]m
 	// 分页查询
 	var notifications []models.Notification
 	offset := (page - 1) * pageSize
-	err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&notifications).Error
+	err := query.
+		Preload("SecretItem").
+		Preload("AccessRequest").
+		Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&notifications).Error
 
 	return notifications, total, err
 }

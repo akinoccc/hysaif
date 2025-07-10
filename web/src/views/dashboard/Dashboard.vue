@@ -24,7 +24,7 @@ import { AUDIT_LOG_ACTION_MAP, AUDIT_LOG_RESOURCE_MAP } from '@/constants/auditL
 import { formatRelativeTime, getFileIcon } from '@/lib/utils'
 import { usePermissionStore } from '@/stores'
 import { useAuthStore } from '@/stores/auth'
-import { getActionColor } from './audit/helper'
+import { getActionColor } from '@/views/audit/helper'
 
 const router = useRouter()
 const authStore = useAuthStore()

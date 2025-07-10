@@ -36,20 +36,22 @@ const (
 // Notification 通知模型
 type Notification struct {
 	ModelBase
-	RecipientID string `json:"-" gorm:"not null;index"`          // 接收者ID
-	Type        string `json:"type" gorm:"not null;index"`       // 通知类型
-	Title       string `json:"title" gorm:"not null"`            // 通知标题
-	Content     string `json:"content" gorm:"type:text"`         // 通知内容
-	Status      string `json:"status" gorm:"default:'unread'"`   // 通知状态
-	Priority    string `json:"priority" gorm:"default:'normal'"` // 优先级
-	RelatedID   string `json:"related_id" gorm:"index"`          // 相关资源ID（如申请ID、密钥项ID等）
-	RelatedType string `json:"related_type"`                     // 相关资源类型
-	ReadAt      uint64 `json:"read_at"`                          // 阅读时间
-	ExpiresAt   uint64 `json:"expires_at"`                       // 过期时间
-	Metadata    string `json:"metadata" gorm:"type:text"`        // 额外元数据（JSON格式）
+	RecipientID string           `json:"-" gorm:"not null;index"`                   // 接收者ID
+	Type        string           `json:"type" gorm:"not null;index"`                // 通知类型
+	Title       string           `json:"title" gorm:"not null"`                     // 通知标题
+	Content     string           `json:"content" gorm:"type:text"`                  // 通知内容
+	Status      string           `json:"status" gorm:"default:'unread'"`            // 通知状态
+	Priority    string           `json:"priority" gorm:"default:'normal'"`          // 优先级
+	RelatedID   string           `json:"related_id" gorm:"index"`                   // 相关资源ID（如申请ID、密钥项ID等）
+	RelatedType string           `json:"related_type"`                              // 相关资源类型
+	ReadAt      uint64           `json:"read_at"`                                   // 阅读时间
+	ExpiresAt   uint64           `json:"expires_at"`                                // 过期时间
+	Metadata    NotificationData `json:"metadata,omitempty" gorm:"serializer:json"` // 额外元数据（JSON格式）
 
 	// 关联
-	Recipient User `json:"recipient" gorm:"foreignKey:RecipientID;references:ID"`
+	SecretItem    SecretItem    `json:"secret_item,omitempty" gorm:"foreignKey:RelatedID;references:ID"`
+	AccessRequest AccessRequest `json:"access_request,omitempty" gorm:"foreignKey:RelatedID;references:ID"`
+	Recipient     User          `json:"recipient,omitempty" gorm:"foreignKey:RecipientID;references:ID"`
 }
 
 // BeforeCreate 钩子函数，在创建记录之前设置ID

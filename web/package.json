@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "vue-tsc -b --noEmit"
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@internationalized/date": "^3.8.1",

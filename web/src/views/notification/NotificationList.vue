@@ -85,9 +85,9 @@ const filterFields: FilterField[] = [
 // 优先级颜色映射
 const priorityColorMap: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
-  normal: 'bg-info text-info-foreground',
-  high: 'bg-warning text-warning-foreground',
-  urgent: 'bg-destructive text-destructive-foreground',
+  normal: 'bg-info text-gray-50',
+  high: 'bg-warning text-gray-50',
+  urgent: 'bg-destructive text-gray-50',
 }
 
 // 计算属性
@@ -183,7 +183,7 @@ const columns: ColumnDef<Notification>[] = [
           variant: 'ghost',
           size: 'sm',
           onClick: () => notificationStore.markAsRead(notification.id),
-        }, () => [h(CheckCheck, { class: 'h-4 w-4' }), '标记已读']),
+        }, () => [h(CheckCheck, { class: 'h-4 w-4' }), '已读']),
         h(Button, {
           variant: 'ghost',
           size: 'sm',
@@ -317,7 +317,7 @@ function navigateToRelated(notification: Notification) {
     router.push(`/access-requests/${notification.related_id}`)
   }
   else if (notification.related_type === 'secret_item' && notification.related_id) {
-    router.push(`/items/${notification.related_id}`)
+    router.push(`/secret-items/${notification.related_id}`)
   }
 }
 

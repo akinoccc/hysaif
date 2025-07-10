@@ -12,7 +12,7 @@ import { api } from './http'
 export const authAPI = {
   /**
    * 用户登录
-   * @param Email 邮箱
+   * @param email 邮箱
    * @param password 密码
    * @returns 登录响应，包含token和用户信息
    */

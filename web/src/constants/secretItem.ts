@@ -20,7 +20,7 @@ import {
   User,
 } from 'lucide-vue-next'
 
-export type SecretItemTypeT = 'password' | 'api_key' | 'access_key' | 'ssh_key' | 'token' | 'custom'
+export type SecretItemTypeT = 'password' | 'api_key' | 'access_key' | 'ssh_key' | 'token' | 'kv'
 
 export const SECRET_ITEM_TYPE = {
   Password: 'password',
@@ -28,7 +28,7 @@ export const SECRET_ITEM_TYPE = {
   AccessKey: 'access_key',
   SshKey: 'ssh_key',
   Token: 'token',
-  Custom: 'custom',
+  KV: 'kv',
 } as const
 
 export const SECRET_ITEM_TYPE_MAP = {
@@ -52,8 +52,8 @@ export const SECRET_ITEM_TYPE_MAP = {
     label: '令牌',
     icon: Coins,
   },
-  [SECRET_ITEM_TYPE.Custom]: {
-    label: '自定义',
+  [SECRET_ITEM_TYPE.KV]: {
+    label: 'KV 键值对',
     icon: Braces,
   },
 }
@@ -188,13 +188,13 @@ export const SECRET_ITEM_CATEGORY = {
     key: 'custom_config',
     label: '自定义配置',
     group: 'custom',
-    types: [SECRET_ITEM_TYPE.Custom],
+    types: [SECRET_ITEM_TYPE.KV],
   },
   CustomSecret: {
     key: 'custom_secret',
     label: '自定义密钥',
     group: 'custom',
-    types: [SECRET_ITEM_TYPE.Custom],
+    types: [SECRET_ITEM_TYPE.KV],
   },
   CustomData: {
     key: 'custom_data',

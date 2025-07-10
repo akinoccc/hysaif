@@ -8,7 +8,7 @@ export const AUDIT_LOG_RESOURCE_LIST = {
   AccessKey: SECRET_ITEM_TYPE.AccessKey,
   SshKey: SECRET_ITEM_TYPE.SshKey,
   Token: SECRET_ITEM_TYPE.Token,
-  Custom: SECRET_ITEM_TYPE.Custom,
+  Custom: SECRET_ITEM_TYPE.KV,
 } as const
 
 export const AUDIT_LOG_RESOURCE_MAP = {
@@ -19,7 +19,7 @@ export const AUDIT_LOG_RESOURCE_MAP = {
   [AUDIT_LOG_RESOURCE_LIST.AccessKey]: '访问密钥',
   [AUDIT_LOG_RESOURCE_LIST.SshKey]: 'SSH密钥',
   [AUDIT_LOG_RESOURCE_LIST.Token]: '令牌',
-  [AUDIT_LOG_RESOURCE_LIST.Custom]: '自定义',
+  [AUDIT_LOG_RESOURCE_LIST.Custom]: 'KV 键值对',
 }
 
 export const AUDIT_LOG_ACTION_LIST = {

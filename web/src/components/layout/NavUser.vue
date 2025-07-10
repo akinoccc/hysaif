@@ -2,12 +2,12 @@
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notification'
-import NotificationCenter from '../NotificationCenter.vue'
-import { Badge } from '../ui/badge'
+import NotificationCenter from './NotificationCenter.vue'
 
 const authStore = useAuthStore()
 const { isMobile } = useSidebar()

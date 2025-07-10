@@ -8,13 +8,13 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('@/components/common/Layout.vue'),
+      component: () => import('@/components/layout/Layout.vue'),
       redirect: '/dashboard',
       children: [
         {
           path: '/dashboard',
           name: 'Dashboard',
-          component: () => import('@/views/Dashboard.vue'),
+          component: () => import('@/views/dashboard/Dashboard.vue'),
           meta: {
             requiresAuth: true,
             menu: {
@@ -86,7 +86,7 @@ const router = createRouter({
         {
           path: '/notifications',
           name: 'Notifications',
-          component: () => import('@/views/NotificationView.vue'),
+          component: () => import('@/views/notification/NotificationList.vue'),
           meta: {
             requiresAuth: true,
             menu: {
@@ -289,13 +289,13 @@ const router = createRouter({
         {
           path: '/custom',
           name: 'CustomList',
-          component: () => import('@/views/custom/CustomList.vue'),
+          component: () => import('@/views/kv/KVList.vue'),
           meta: {
             requiresAuth: true,
             menu: {
-              title: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Custom].label,
-              icon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.Custom].icon,
-              order: 8,
+              title: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.KV].label,
+              icon: SECRET_ITEM_TYPE_MAP[SECRET_ITEM_TYPE.KV].icon,
+              order: 11,
               showInMenu: true,
             },
           },
@@ -303,7 +303,7 @@ const router = createRouter({
         {
           path: '/custom/create',
           name: 'CustomCreate',
-          component: () => import('@/views/custom/CustomForm.vue'),
+          component: () => import('@/views/kv/KVForm.vue'),
           meta: {
             requiresAuth: true,
           },
@@ -311,7 +311,7 @@ const router = createRouter({
         {
           path: '/custom/:id',
           name: 'CustomDetail',
-          component: () => import('@/views/custom/CustomDetail.vue'),
+          component: () => import('@/views/kv/KVDetail.vue'),
           meta: {
             requiresAuth: true,
           },
@@ -319,7 +319,7 @@ const router = createRouter({
         {
           path: '/custom/:id/edit',
           name: 'CustomEdit',
-          component: () => import('@/views/custom/CustomForm.vue'),
+          component: () => import('@/views/kv/KVForm.vue'),
           meta: {
             requiresAuth: true,
           },
@@ -375,10 +375,9 @@ router.beforeEach(async (to, _, next) => {
     if (cacheKeys.length === 0) {
       try {
         await permissionStore.initializePermissions()
-        console.log('路由守卫中权限缓存初始化完成')
       }
       catch (error) {
-        console.error('路由守卫中权限缓存初始化失败:', error)
+        console.error(error)
       }
     }
 

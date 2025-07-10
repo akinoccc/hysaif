@@ -49,7 +49,6 @@ function base64URLStringToBuffer(base64URLString: string): ArrayBuffer {
  * 准备注册选项（将服务器返回的选项转换为浏览器可用的格式）
  */
 export function prepareRegistrationOptions(options: any): PublicKeyCredentialCreationOptions {
-  console.log('options', options)
   return {
     ...options,
     challenge: base64URLStringToBuffer(options.challenge),

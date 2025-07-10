@@ -4,5 +4,5 @@ import { SECRET_ITEM_TYPE } from '@/constants'
 </script>
 
 <template>
-  <SecretList :secret-type="SECRET_ITEM_TYPE.Custom" />
+  <SecretList :secret-type="SECRET_ITEM_TYPE.KV" />
 </template>

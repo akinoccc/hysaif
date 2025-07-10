@@ -102,12 +102,12 @@ export function useSecretItemForm(itemType: string) {
         notes: '',
       }
       break
-    case SECRET_ITEM_TYPE.Custom:
+    case SECRET_ITEM_TYPE.KV:
       dataSchema = z.object({
         custom_data: z.array(z.object({
           key: z.string().min(1, '请输入键'),
           value: z.string().min(1, '请输入值'),
-        })).min(1, '请添加自定义数据'),
+        })).min(1, '至少添加一个键值对'),
         notes: z.string().optional(),
       })
       initialData = {
@@ -226,7 +226,7 @@ export function useSecretItemForm(itemType: string) {
           notes: item.data?.notes,
         }
       }
-      else if (itemType === SECRET_ITEM_TYPE.Custom) {
+      else if (itemType === SECRET_ITEM_TYPE.KV) {
         itemData = {
           custom_data: Array.isArray(item.data?.custom_data)
             ? item.data.custom_data

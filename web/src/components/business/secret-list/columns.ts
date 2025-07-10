@@ -3,6 +3,7 @@ import type { SecretItem } from '@/api/types'
 import { Edit, Eye, Key, Trash2 } from 'lucide-vue-next'
 import { h } from 'vue'
 import PermissionButton from '@/components/common/permission/PermissionButton.vue'
+import Button from '@/components/ui/button/Button.vue'
 import { getCategoryByKey, SECRET_ITEM_TYPE } from '@/constants'
 import { formatDate } from '@/lib/utils'
 import { usePermissionStore } from '@/stores/permission'
@@ -161,25 +162,27 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
         else if (hasApprovedAccess) {
           // 有已批准访问申请的用户显示查看按钮（使用getItemWithAccess）
           actions.push(
-            h('button', {
-              class: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9',
+            h(Button, {
+              variant: 'ghost',
+              size: 'sm',
               title: '查看密钥（通过访问申请）',
               onClick: () => {
                 window.dispatchEvent(new CustomEvent('view-item-with-access', { detail: item }))
               },
-            }, h(Eye, { class: 'h-4 w-4 text-green-600' })),
+            }, () => h(Eye, { class: 'h-4 w-4 text-green-600' })),
           )
         }
         else {
           // 没有直接访问权限且无已批准申请的用户显示申请访问按钮
           actions.push(
-            h('button', {
-              class: 'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9',
+            h(Button, {
+              variant: 'ghost',
+              size: 'sm',
               title: '申请访问权限',
               onClick: () => {
                 window.dispatchEvent(new CustomEvent('request-access', { detail: item }))
               },
-            }, h(Key, { class: 'h-4 w-4 text-blue-600' })),
+            }, () => h(Key, { class: 'h-4 w-4 text-blue-600' })),
           )
         }
 
@@ -244,4 +247,4 @@ export const passwordColumns = generateColumns(SECRET_ITEM_TYPE.Password)
 export const sshKeyColumns = generateColumns(SECRET_ITEM_TYPE.SshKey)
 export const tokenColumns = generateColumns(SECRET_ITEM_TYPE.Token)
 export const accessKeyColumns = generateColumns(SECRET_ITEM_TYPE.AccessKey)
-export const customColumns = generateColumns(SECRET_ITEM_TYPE.Custom)
+export const customColumns = generateColumns(SECRET_ITEM_TYPE.KV)

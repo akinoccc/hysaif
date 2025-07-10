@@ -47,12 +47,12 @@ function removeField(index: number) {
 
 <template>
   <div class="space-y-4">
-    <!-- 自定义字段列表 -->
+    <!-- KV 键值对列表 -->
     <div class="space-y-4">
       <div v-for="(_, index) in customDataArray" :key="index" class="p-4 border rounded-md bg-card">
         <div class="flex justify-between items-center mb-2">
           <h4 class="text-sm font-medium">
-            字段 {{ index + 1 }}
+            KV 键值对 {{ index + 1 }}
           </h4>
           <Button variant="ghost" size="icon" class="h-8 w-8" @click="removeField(index)">
             <Trash2 class="h-4 w-4" />
@@ -60,17 +60,17 @@ function removeField(index: number) {
         </div>
 
         <div class="grid gap-4 grid-cols-1 xl:grid-cols-2">
-          <!-- 字段名称 -->
+          <!-- KV 键名称 -->
           <FormField v-slot="{ componentField }" :name="`data.custom_data[${index}].key`">
             <FormItem>
               <FormLabel class="gap-0.5">
-                <span class="text-red-500">*</span>字段名称
+                <span class="text-red-500">*</span>KV 键名称
               </FormLabel>
               <FormControl>
-                <Input v-bind="componentField" placeholder="输入字段名称" />
+                <Input v-bind="componentField" placeholder="输入 KV 键名称" />
               </FormControl>
               <FormDescription>
-                自定义字段的名称或标识符
+                KV 键的名称或标识符
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -80,16 +80,16 @@ function removeField(index: number) {
           <FormField v-slot="{ componentField }" :name="`data.custom_data[${index}].value`">
             <FormItem>
               <FormLabel class="gap-0.5">
-                <span class="text-red-500">*</span>字段值
+                <span class="text-red-500">*</span>KV 键值
               </FormLabel>
               <FormControl>
                 <SecretInput
                   v-model="componentField.modelValue" toggleable
-                  placeholder="输入字段值" @update:model-value="componentField.onChange"
+                  placeholder="输入 KV 键值" @update:model-value="componentField.onChange"
                 />
               </FormControl>
               <FormDescription>
-                自定义字段的值或内容
+                KV 键的值或内容
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -98,10 +98,10 @@ function removeField(index: number) {
       </div>
     </div>
 
-    <!-- 添加字段按钮 -->
+    <!-- 添加 KV 键值对按钮 -->
     <Button type="button" variant="outline" class="w-full" @click="addField">
       <Plus class=" h-4 w-4" />
-      添加字段
+      添加 KV 键值对
     </Button>
 
     <!-- 备注 -->
