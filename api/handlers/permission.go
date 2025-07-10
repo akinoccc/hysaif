@@ -435,7 +435,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 		{Path: "/policy", Title: "角色权限", Icon: "Shield", Order: 3},
 		{Path: "/audit", Title: "审计日志", Icon: "FileText", Order: 4},
 		{Path: "/access_requests", Title: "访问申请", Icon: "FileText", Order: 5},
-		{Path: "/api_key", Title: "API密钥", Icon: "Key", Order: 6},
+		{Path: "/api_key", Title: "API 密钥", Icon: "Key", Order: 6},
 		{Path: "/access_key", Title: "访问密钥", Icon: "KeyRound", Order: 7},
 		{Path: "/ssh_key", Title: "SSH密钥", Icon: "Terminal", Order: 8},
 		{Path: "/password", Title: "密码", Icon: "Lock", Order: 9},

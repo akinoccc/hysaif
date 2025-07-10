@@ -16,7 +16,7 @@ type SecretItem struct {
 	ModelBase
 	Name        string          `json:"name" gorm:"not null"`
 	Description string          `json:"description"`
-	Type        string          `json:"type" gorm:"not null"`        // password, api_key, access_key, ssh_key, certificate, token, custom
+	Type        string          `json:"type" gorm:"not null"`        // password, api_key, access_key, ssh_key, certificate, token, kv
 	Category    string          `json:"category"`                    // 分类：aws, aliyun, github等
 	Tags        []string        `json:"tags" gorm:"serializer:json"` // JSON格式的标签数组
 	Data        *SecretItemData `json:"data" gorm:"type:text"`       // 加密后的敏感数据
