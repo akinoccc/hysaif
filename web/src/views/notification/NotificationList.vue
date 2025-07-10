@@ -190,11 +190,11 @@ const columns: ColumnDef<Notification>[] = [
           class: 'text-red-600 hover:bg-red-50 hover:text-red-600',
           onClick: () => openSingleDeleteDialog(notification.id),
         }, () => [h(Trash2, { class: 'h-4 w-4' }), '删除']),
-        notification.related_type && notification.related_id && h(Button, {
-          variant: 'ghost',
-          size: 'sm',
-          onClick: () => navigateToRelated(notification),
-        }, () => [h(ExternalLink, { class: 'h-4 w-4' }), '查看详情']),
+        // notification.related_type && notification.related_id && h(Button, {
+        //   variant: 'ghost',
+        //   size: 'sm',
+        //   onClick: () => navigateToRelated(notification),
+        // }, () => [h(ExternalLink, { class: 'h-4 w-4' }), '查看详情']),
       ])
     },
   },
