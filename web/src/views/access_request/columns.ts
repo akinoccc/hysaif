@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { AccessRequest } from '@/api/types'
 import { Ban, Check, X } from 'lucide-vue-next'
-import { h } from 'vue'
+import { h, type VNode } from 'vue'
 import PermissionButton from '@/components/common/permission/PermissionButton.vue'
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/utils'
@@ -127,7 +127,7 @@ export const accessRequestColumns: ColumnDef<AccessRequest>[] = [
     header: '操作',
     cell: ({ row }) => {
       const request = row.original
-      const actions = []
+      const actions: VNode[] = []
 
       if (request.status === 'pending') {
         // 批准按钮

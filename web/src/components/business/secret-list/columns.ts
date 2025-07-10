@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/vue-table'
 import type { SecretItem } from '@/api/types'
 import { Edit, Eye, Key, Trash2 } from 'lucide-vue-next'
-import { h } from 'vue'
+import { h, type VNode } from 'vue'
 import PermissionButton from '@/components/common/permission/PermissionButton.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { getCategoryByKey, SECRET_ITEM_TYPE } from '@/constants'
@@ -144,7 +144,7 @@ export function generateColumns(type: string): ColumnDef<SecretItem>[] {
 
         const hasDirectAccess = permissionStore.hasPermission('secret', 'update', false)
         const hasApprovedAccess = item.has_approved_access
-        const actions = []
+        const actions: VNode[] = []
 
         if (hasDirectAccess) {
           // 有直接访问权限的用户显示查看按钮
