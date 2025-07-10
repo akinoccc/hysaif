@@ -123,8 +123,8 @@ services:
     depends_on:
       # hysaif-web:
       #   condition: service_healthy
-      hysaif-api:
-        condition: service_healthy
+      # hysaif-api:
+      #   condition: service_healthy
     networks:
       - hysaif-network
     healthcheck:
