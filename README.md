@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="web/public/logo.svg" alt="HySAIF Logo" width="128" height="128">
+  <img src="web/public/logo.svg" alt="Hysaif Logo" width="128" height="128">
   
-  # HySAIF - 企业级敏感信息管理系统
+  # Hysaif - 企业级敏感信息管理系统
   
   一个现代化的企业级敏感信息管理系统，提供安全的密钥、凭证和敏感数据管理解决方案。
 </div>
@@ -168,7 +168,7 @@ pnpm build
     "encryption_key": "32位加密密钥",
     "jwt_secret": "JWT密钥",
     "webauthn": {
-      "rp_display_name": "HySAIF",
+      "rp_display_name": "Hysaif",
       "rp_id": "localhost",
       "rp_origins": ["http://localhost:5173"]
     },
@@ -353,4 +353,4 @@ docker compose up -d
 
 ---
 
-**HySAIF** - 让敏感信息管理更安全、更简单 🔐 
+**Hysaif** - 让敏感信息管理更安全、更简单 🔐 
