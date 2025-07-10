@@ -2,9 +2,7 @@ package handlers
 
 import (
 	"log"
-	"math"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +10,7 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/notification"
+	"github.com/akinoccc/hysaif/api/packages/query"
 	"github.com/akinoccc/hysaif/api/types"
 )
 
@@ -77,68 +76,28 @@ func CreateAccessRequest(c *gin.Context) {
 // GetAccessRequests 获取访问申请列表
 func GetAccessRequests(c *gin.Context) {
 	user := context.GetCurrentUser(c)
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	status := c.Query("status")
-	applicantName := c.Query("applicant_name")
-	secretItemName := c.Query("secret_item_name")
-	createdAtFrom := c.Query("created_at_from")
-	createdAtTo := c.Query("created_at_to")
-	sortBy := c.Query("sort_by")
 
-	offset := (page - 1) * pageSize
-
-	query := models.DB.Model(&models.AccessRequest{}).
-		Preload("SecretItem").
-		Preload("Applicant").
-		Preload("Approver")
+	// 使用查询构建器
+	qb := query.NewQueryBuilder(models.DB, c, &models.AccessRequest{}).
+		ApplyAccessRequestFilters().
+		Preload("SecretItem", "Applicant", "Approver").
+		OrderBy("created_at DESC")
 
 	// 权限控制：普通用户只能查看自己的申请
 	if !user.HasPermission("access_request", "approve") {
-		query = query.Where("applicant_id = ?", user.ID)
+		qb = qb.Where("applicant_id = ?", user.ID)
 	}
-
-	if status != "" {
-		query = query.Where("status = ?", status)
-	}
-	if applicantName != "" {
-		userIDs := []string{}
-		models.DB.Model(&models.User{}).Where("name LIKE ?", "%"+applicantName+"%").Pluck("id", &userIDs)
-		query = query.Where("applicant_id IN (?)", userIDs)
-	}
-	if secretItemName != "" {
-		secretItemIDs := []string{}
-		models.DB.Model(&models.SecretItem{}).Where("name LIKE ?", "%"+secretItemName+"%").Pluck("id", &secretItemIDs)
-		query = query.Where("secret_item_id IN (?)", secretItemIDs)
-	}
-
-	if createdAtFrom != "" {
-		query = query.Where("created_at >= ?", createdAtFrom)
-	}
-	if createdAtTo != "" {
-		query = query.Where("created_at <= ?", createdAtTo)
-	}
-	if sortBy != "" {
-		query = query.Order(sortBy)
-	}
-
-	var total int64
-	query.Count(&total)
 
 	var requests []models.AccessRequest
-	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&requests).Error; err != nil {
+	pagination, err := qb.Execute(&requests)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
 		return
 	}
 
 	c.JSON(http.StatusOK, types.ListResponse[models.AccessRequest]{
-		Data: requests,
-		Pagination: types.Pagination{
-			Page:       page,
-			PageSize:   pageSize,
-			Total:      int(total),
-			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
-		},
+		Data:       requests,
+		Pagination: *pagination,
 	})
 }
 

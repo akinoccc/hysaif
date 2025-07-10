@@ -11,6 +11,7 @@ import (
 	"github.com/akinoccc/hysaif/api/middleware"
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
+	"github.com/akinoccc/hysaif/api/packages/query"
 	"github.com/akinoccc/hysaif/api/types"
 	"gorm.io/gorm"
 
@@ -20,74 +21,16 @@ import (
 // GetSecretItems 获取信息项列表
 func GetSecretItems(c *gin.Context) {
 	user := context.GetCurrentUser(c)
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	category := c.Query("category")
-	itemType := c.Query("type")
-	status := c.Query("status")
-	environment := c.Query("environment")
-	search := c.Query("search")
-	tag := c.Query("tag")
-	creator := c.Query("creator_name")
 
-	createdAtFrom := c.Query("created_at_from")
-	createdAtTo := c.Query("created_at_to")
-	sortBy := c.Query("sort_by")
-
-	offset := (page - 1) * pageSize
-
-	query := models.DB.Model(&models.SecretItem{})
-
-	if category != "" {
-		query = query.Where("category = ?", category)
-	}
-	if itemType != "" {
-		query = query.Where("type = ?", itemType)
-	}
-	if status != "" {
-		switch status {
-		case "expired":
-			query = query.Where("expires_at < ?", time.Now().UnixMilli())
-		case "expiring":
-			query = query.Where("expires_at > ? AND expires_at < ?", time.Now().UnixMilli(), time.Now().AddDate(0, 0, 7).UnixMilli())
-		case "active":
-			query = query.Where("expires_at > ?", time.Now().UnixMilli())
-		}
-	}
-	if environment != "" {
-		query = query.Where("environment = ?", environment)
-	}
-	if search != "" {
-		query = query.Where("name LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
-	}
-	if tag != "" {
-		query = query.Where("tags LIKE %?%", tag)
-	}
-	if creator != "" {
-		userIDs := []string{}
-		models.DB.Model(&models.User{}).Where("name LIKE ?", "%"+creator+"%").Pluck("id", &userIDs)
-		query = query.Where("created_by IN (?)", userIDs)
-	}
-	if createdAtFrom != "" {
-		query = query.Where("created_at >= ?", createdAtFrom)
-	}
-	if createdAtTo != "" {
-		query = query.Where("created_at <= ?", createdAtTo)
-	}
-	if sortBy != "" {
-		query = query.Order(sortBy)
-	}
-
-	var total int64
-	query.Count(&total)
-
+	// 使用查询构建器简化查询逻辑
 	var items []models.SecretItem
-	if err := query.
-		Preload("Creator").
-		Preload("Updater").
-		Offset(offset).
-		Limit(pageSize).
-		Find(&items).Error; err != nil {
+	pagination, err := query.NewQueryBuilder(models.DB, c, &models.SecretItem{}).
+		ApplySecretItemFilters().
+		Preload("Creator", "Updater").
+		OrderBy("created_at DESC").
+		Execute(&items)
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
 		return
 	}
@@ -124,16 +67,13 @@ func GetSecretItems(c *gin.Context) {
 		}
 	}
 
+	// 获取itemType用于审计日志
+	itemType := c.Query("type")
 	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(itemType))(c)
 
 	c.JSON(http.StatusOK, types.ListResponse[models.SecretItem]{
-		Data: items,
-		Pagination: types.Pagination{
-			Page:       page,
-			PageSize:   pageSize,
-			Total:      int(total),
-			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
-		},
+		Data:       items,
+		Pagination: *pagination,
 	})
 }
 

@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"math"
 	"net/http"
-	"strconv"
 
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
+	"github.com/akinoccc/hysaif/api/packages/query"
 	"github.com/akinoccc/hysaif/api/types"
 
 	"github.com/gin-gonic/gin"
@@ -29,60 +28,14 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 
-	// 分页参数
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	// 查询参数
-	name := c.Query("name")
-	role := c.Query("role")
-	status := c.Query("status")
-
-	// 构建查询
-	var users []models.User
-	var total int64
-	query := models.DB.Model(&models.User{})
-
-	if name != "" {
-		query = query.Where("name LIKE ?", "%"+name+"%")
-	}
-	if role != "" {
-		query = query.Where("role = ?", role)
-	}
-	if status != "" {
-		query = query.Where("status = ?", status)
-	}
-
-	// 计算总数
-	query.Count(&total)
-
-	// 分页查询
-	err := query.
-		Preload("Creator").
-		Preload("Updater").
-		Offset((page - 1) * pageSize).
-		Limit(pageSize).
-		Find(&users).Error
+	// 使用查询构建器简化查询逻辑
+	response, err := query.QueryUsers(models.DB, c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "查询失败"})
 		return
 	}
 
-	c.JSON(http.StatusOK, types.ListResponse[models.User]{
-		Data: users,
-		Pagination: types.Pagination{
-			Page:       page,
-			PageSize:   pageSize,
-			Total:      int(total),
-			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
-		},
-	})
+	c.JSON(http.StatusOK, response)
 }
 
 // GetUser 获取指定用户信息
