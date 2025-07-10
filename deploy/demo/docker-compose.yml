@@ -121,8 +121,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
-      hysaif-web:
-        condition: service_healthy
+      # hysaif-web:
+      #   condition: service_healthy
       hysaif-api:
         condition: service_healthy
     networks:
