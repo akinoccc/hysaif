@@ -110,8 +110,8 @@ async function handlePasskeyLogin() {
         <div class="absolute top-1/3 right-20 w-8 h-8 border-2 border-blue-500/10 transform rotate-45" />
 
         <div class="max-w-md text-center text-white relative z-10">
-          <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl shadow-blue-500/30">
-            <Building2 class="h-12 w-12 text-white" />
+          <div class="mb-8 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 shadow-2xl shadow-blue-500/30">
+            <img src="/logo.svg" alt="HySAIF Logo" class="h-14 w-14 text-white">
           </div>
           <h1 class="mb-6 text-4xl font-bold leading-tight">
             企业级安全管理
