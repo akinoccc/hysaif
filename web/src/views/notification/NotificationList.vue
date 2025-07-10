@@ -4,7 +4,7 @@ import type { Notification } from '@/api/notification'
 import type { FilterField } from '@/components/common/layout'
 import { formatDistanceToNow } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import { AlertTriangle, Bell, CheckCheck, CheckCircle, Clock, ExternalLink, Info, Trash2 } from 'lucide-vue-next'
+import { AlertTriangle, Bell, CheckCheck, CheckCircle, Clock, Info, Trash2 } from 'lucide-vue-next'
 import { computed, h, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
