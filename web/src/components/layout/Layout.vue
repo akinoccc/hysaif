@@ -120,7 +120,8 @@ watch(() => authStore.isAuthenticated, () => {
       <SidebarHeader class="py-4">
         <div class="flex items-center justify-between px-4">
           <router-link to="/" class="flex items-center space-x-2">
-            <Shield class="h-6 w-6 text-primary" />
+            <!-- <Shield class="h-6 w-6 text-primary" /> -->
+            <img src="/logo.svg" alt="HySAIF Logo" class="h-8 w-8 text-primary">
             <span class="font-bold text-lg text-sidebar-foreground">Hysaif SIMS</span>
           </router-link>
           <!-- 主题切换按钮 -->

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <!-- 主渐变 - 蓝紫色渐变体现科技感 -->
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    
+    <!-- 钥匙渐变 - 金色渐变 -->
+    <linearGradient id="keyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="50%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#FCD34D"/>
+    </linearGradient>
+    
+    <!-- 内部高光 -->
+    <linearGradient id="highlightGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+    </linearGradient>
+    
+    <!-- 阴影滤镜 -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <!-- 主盾牌外形 -->
+  <path d="M32 4 L56 12 L56 32 Q56 48 32 60 Q8 48 8 32 L8 12 Z" 
+        fill="url(#shieldGradient)" 
+        filter="url(#dropShadow)"/>
+  
+  <!-- 盾牌内部高光 -->
+  <path d="M32 6 L54 13 L54 32 Q54 46 32 58 Q10 46 10 32 L10 13 Z" 
+        fill="url(#highlightGradient)"/>
+  
+  <!-- 钥匙主体 -->
+  <g fill="url(#keyGradient)">
+    <!-- 钥匙柄（圆形部分） -->
+    <circle cx="24" cy="28" r="6" stroke="#FFFFFF" stroke-width="1.2"/>
+    <circle cx="24" cy="28" r="3" fill="#FFFFFF"/>
+    
+    <!-- 钥匙杆 -->
+    <rect x="24" y="26" width="16" height="3" rx="1.5"/>
+    
+    <!-- 钥匙齿 -->
+    <rect x="38" y="26" width="2.5" height="4" rx="0.5"/>
+    <rect x="35" y="26" width="2.5" height="3" rx="0.5"/>
+  </g>
+  
+  <!-- 安全锁定图标 -->
+  <g fill="#FFFFFF" opacity="0.9">
+    <!-- 锁体 -->
+    <rect x="26" y="42" width="10" height="7" rx="1.2"/>
+    <!-- 锁环 -->
+    <path d="M28 42 L28 38 Q32 36 36 38 L36 42" 
+          stroke="#FFFFFF" 
+          stroke-width="1.8" 
+          fill="none"/>
+    <!-- 锁心 -->
+    <circle cx="31" cy="46" r="1.2"/>
+  </g>
+  
+  <!-- 数据流线条效果 -->
+  <g stroke="#FFFFFF" stroke-width="1.2" fill="none" opacity="0.6">
+    <path d="M12 20 Q14 22 16 20 Q18 18 20 20"/>
+    <path d="M44 20 Q46 22 48 20 Q50 18 52 20"/>
+    <path d="M12 44 Q14 42 16 44 Q18 46 20 44"/>
+    <path d="M44 44 Q46 42 48 44 Q50 46 52 44"/>
+  </g>
+  
+  <!-- 中心光点 -->
+  <circle cx="32" cy="32" r="1.5" fill="#FFFFFF" opacity="0.8"/>
+</svg> 

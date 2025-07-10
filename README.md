@@ -1,6 +1,10 @@
-# HySAIF - 企业级敏感信息管理系统
-
-一个现代化的企业级敏感信息管理系统，提供安全的密钥、凭证和敏感数据管理解决方案。
+<div align="center">
+  <img src="web/public/logo.svg" alt="HySAIF Logo" width="128" height="128">
+  
+  # HySAIF - 企业级敏感信息管理系统
+  
+  一个现代化的企业级敏感信息管理系统，提供安全的密钥、凭证和敏感数据管理解决方案。
+</div>
 
 ## 📋 目录
 
