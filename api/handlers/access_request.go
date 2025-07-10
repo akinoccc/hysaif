@@ -11,6 +11,7 @@ import (
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/notification"
 	"github.com/akinoccc/hysaif/api/packages/query"
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	"github.com/akinoccc/hysaif/api/types"
 )
 
@@ -20,7 +21,7 @@ func CreateAccessRequest(c *gin.Context) {
 
 	var req types.CreateAccessRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -108,7 +109,7 @@ func ApproveAccessRequest(c *gin.Context) {
 
 	var req types.ApproveAccessRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -161,7 +162,7 @@ func RevokeAccessRequest(c *gin.Context) {
 
 	var req types.RevokeAccessRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -200,7 +201,7 @@ func RejectAccessRequest(c *gin.Context) {
 
 	var req types.RejectAccessRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 

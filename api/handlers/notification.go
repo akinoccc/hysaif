@@ -8,6 +8,7 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/notification"
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	"github.com/akinoccc/hysaif/api/types"
 
 	"github.com/gin-gonic/gin"
@@ -200,7 +201,7 @@ func CreateNotification(c *gin.Context) {
 
 	var req types.CreateNotificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -258,7 +259,7 @@ func SendBulkNotification(c *gin.Context) {
 
 	var req types.BulkNotificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 

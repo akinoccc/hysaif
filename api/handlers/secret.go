@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/query"
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	"github.com/akinoccc/hysaif/api/types"
 	"gorm.io/gorm"
 
@@ -83,7 +83,7 @@ func CreateSecretItem(c *gin.Context) {
 
 	var req types.PostItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -162,8 +162,7 @@ func UpdateSecretItem(c *gin.Context) {
 
 	var req types.PostItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 

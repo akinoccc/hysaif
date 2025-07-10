@@ -10,6 +10,7 @@ import (
 
 	"github.com/akinoccc/hysaif/api/middleware"
 	"github.com/akinoccc/hysaif/api/models"
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	webauthnPkg "github.com/akinoccc/hysaif/api/packages/webauthn"
 	"github.com/akinoccc/hysaif/api/types"
 
@@ -29,7 +30,7 @@ var (
 func Login(c *gin.Context) {
 	var req types.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -82,10 +83,10 @@ func Logout(c *gin.Context) {
 // WebAuthnBeginRegistration 开始 WebAuthn 注册
 func WebAuthnBeginRegistration(c *gin.Context) {
 	var req struct {
-		CredentialName string `json:"credential_name"`
+		CredentialName string `json:"credential_name" binding:"required,min=1,max=50"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -186,10 +187,10 @@ func WebAuthnFinishRegistration(c *gin.Context) {
 // WebAuthnBeginLogin 开始 WebAuthn 登录
 func WebAuthnBeginLogin(c *gin.Context) {
 	var req struct {
-		Email string `json:"email"`
+		Email string `json:"email" binding:"required,email"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -223,7 +224,7 @@ func WebAuthnBeginLogin(c *gin.Context) {
 // WebAuthnFinishLogin 完成 WebAuthn 登录
 func WebAuthnFinishLogin(c *gin.Context) {
 	var req struct {
-		Email string `json:"email"`
+		Email string `json:"email" binding:"required,email"`
 	}
 
 	// 先读取原始请求体

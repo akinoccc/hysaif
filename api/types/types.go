@@ -13,8 +13,8 @@ type Pagination struct {
 
 // 认证相关类型
 type LoginRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=1"`
 }
 
 type LoginResponse struct {
@@ -24,7 +24,7 @@ type LoginResponse struct {
 
 // WebAuthn 相关类型
 type WebAuthnBeginRegistrationRequest struct {
-	CredentialName string `json:"credential_name" binding:"required"` // 凭证名称
+	CredentialName string `json:"credential_name" binding:"required,min=1,max=50"` // 凭证名称
 }
 
 type WebAuthnBeginRegistrationResponse struct {
@@ -32,8 +32,8 @@ type WebAuthnBeginRegistrationResponse struct {
 }
 
 type WebAuthnFinishRegistrationRequest struct {
-	Response       interface{} `json:"response" binding:"required"`        // WebAuthn 注册响应
-	CredentialName string      `json:"credential_name" binding:"required"` // 凭证名称
+	Response       interface{} `json:"response" binding:"required"`                     // WebAuthn 注册响应
+	CredentialName string      `json:"credential_name" binding:"required,min=1,max=50"` // 凭证名称
 }
 
 type WebAuthnBeginLoginResponse struct {
@@ -79,37 +79,37 @@ type WeWorkAuthURLResponse struct {
 
 // 用户相关类型
 type UpdateProfileRequest struct {
-	Email string `json:"email"`
+	Email string `json:"email" binding:"omitempty,email"`
 }
 
 type CreateUserRequest struct {
-	Name        string   `json:"name" binding:"required"`
-	Password    string   `json:"password" binding:"required,min=8"`
+	Name        string   `json:"name" binding:"required,min=2,max=50"`
+	Password    string   `json:"password" binding:"required,min=8,max=128"`
 	Email       string   `json:"email" binding:"required,email"`
-	Role        string   `json:"role" binding:"required"`
+	Role        string   `json:"role" binding:"required,oneof=super_admin sec_mgr dev auditor"`
 	Permissions []string `json:"permissions"`
 }
 
 type UpdateUserRequest struct {
-	Name        string   `json:"name"`
+	Name        string   `json:"name" binding:"omitempty,min=2,max=50"`
 	Email       string   `json:"email" binding:"omitempty,email"`
-	Role        string   `json:"role"`
-	Status      string   `json:"status"`
+	Role        string   `json:"role" binding:"omitempty,oneof=super_admin sec_mgr dev auditor"`
+	Status      string   `json:"status" binding:"omitempty,oneof=active disabled locked expired"`
 	Permissions []string `json:"permissions"`
-	Password    string   `json:"password" binding:"omitempty,min=8"`
+	Password    string   `json:"password" binding:"omitempty,min=8,max=128"`
 }
 
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password" binding:"required"`
-	NewPassword string `json:"new_password" binding:"required,min=8"`
+	NewPassword string `json:"new_password" binding:"required,min=8,max=128"`
 }
 
 type UserListParams struct {
 	Page     int    `form:"page" binding:"omitempty,min=1"`
 	PageSize int    `form:"page_size" binding:"omitempty,min=1,max=100"`
 	Search   string `form:"search"`
-	Role     string `form:"role"`
-	Status   string `form:"status"`
+	Role     string `form:"role" binding:"omitempty,oneof=super_admin sec_mgr admin user"`
+	Status   string `form:"status" binding:"omitempty,oneof=active disabled locked expired"`
 	SortBy   string `form:"sort_by"`
 	SortDesc bool   `form:"sort_desc"`
 }
@@ -117,13 +117,13 @@ type UserListParams struct {
 // 信息项相关类型
 
 type PostItemRequest struct {
-	Name        string                `json:"name"`
-	Type        string                `json:"type"` // password, api_key, access_key, ssh_key, certificate, token, custom
-	Description string                `json:"description,omitempty"`
-	Category    string                `json:"category"`
-	Environment string                `json:"environment"`
+	Name        string                `json:"name" binding:"required,min=1,max=100"`
+	Type        string                `json:"type" binding:"required,oneof=password api_key access_key ssh_key certificate token kv"` // password, api_key, access_key, ssh_key, certificate, token, kv
+	Description string                `json:"description,omitempty" binding:"max=500"`
+	Category    string                `json:"category" binding:"required,min=1,max=50"`
+	Environment string                `json:"environment" binding:"required,oneof=development staging production test"`
 	Tags        []string              `json:"tags,omitempty" gorm:"type:text;serializer:json"`
-	Data        models.SecretItemData `json:"data,omitempty" gorm:"type:text;serializer:json"`
+	Data        models.SecretItemData `json:"data" binding:"required" gorm:"type:text;serializer:json"`
 	ExpiresAt   uint64                `json:"expires_at,omitempty"`
 }
 
@@ -137,6 +137,11 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+type ValidationErrorResponse struct {
+	Error   string              `json:"error"`
+	Details map[string][]string `json:"details,omitempty"`
+}
+
 type MessageResponse struct {
 	Message string `json:"message"`
 }
@@ -144,28 +149,28 @@ type MessageResponse struct {
 // 访问申请相关类型
 type CreateAccessRequestRequest struct {
 	SecretItemID string `json:"secret_item_id" binding:"required"`
-	Reason       string `json:"reason" binding:"required"`
+	Reason       string `json:"reason" binding:"required,min=5,max=500"`
 }
 
 type ApproveAccessRequestRequest struct {
-	ValidDuration int    `json:"valid_duration" binding:"required,min=1"` // 有效时长（小时）
-	Note          string `json:"note"`                                    // 审批备注
+	ValidDuration int    `json:"valid_duration" binding:"required,min=1,max=8760"` // 有效时长（小时），最大365天
+	Note          string `json:"note" binding:"max=500"`                           // 审批备注
 }
 
 type RejectAccessRequestRequest struct {
-	Reason string `json:"reason" binding:"required"` // 拒绝理由
+	Reason string `json:"reason" binding:"required,min=5,max=500"` // 拒绝理由
 }
 
 type RevokeAccessRequestRequest struct {
-	Reason string `json:"reason" binding:"required"` // 作废理由
+	Reason string `json:"reason" binding:"required,min=5,max=500"` // 作废理由
 }
 
 type AccessRequestListParams struct {
 	Page         int    `form:"page" binding:"omitempty,min=1"`
 	PageSize     int    `form:"page_size" binding:"omitempty,min=1,max=100"`
-	Status       string `form:"status"`         // pending, approved, rejected, expired, revoked
-	ApplicantID  string `form:"applicant_id"`   // 申请人ID
-	SecretItemID string `form:"secret_item_id"` // 密钥项ID
+	Status       string `form:"status" binding:"omitempty,oneof=pending approved rejected expired revoked"` // pending, approved, rejected, expired, revoked
+	ApplicantID  string `form:"applicant_id"`                                                               // 申请人ID
+	SecretItemID string `form:"secret_item_id"`                                                             // 密钥项ID
 	SortBy       string `form:"sort_by"`
 	SortDesc     bool   `form:"sort_desc"`
 }
@@ -174,7 +179,7 @@ type ItemsListParams struct {
 	Page     int    `form:"page" binding:"omitempty,min=1"`
 	PageSize int    `form:"page_size" binding:"omitempty,min=1,max=100"`
 	Category string `form:"category"`
-	Type     string `form:"type"`
+	Type     string `form:"type" binding:"omitempty,oneof=password api_key access_key ssh_key certificate token kv"`
 	Search   string `form:"search"`
 	SortBy   string `form:"sort_by"`
 	SortDesc bool   `form:"sort_desc"`

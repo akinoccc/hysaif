@@ -8,24 +8,24 @@ import "github.com/akinoccc/hysaif/api/models"
 type GetNotificationsRequest struct {
 	Page     int    `form:"page" binding:"omitempty,min=1"`
 	PageSize int    `form:"page_size" binding:"omitempty,min=1,max=100"`
-	Status   string `form:"status"`   // unread, read, all
-	Type     string `form:"type"`     // 通知类型过滤
-	Priority string `form:"priority"` // 优先级过滤
+	Status   string `form:"status" binding:"omitempty,oneof=unread read all"`          // unread, read, all
+	Type     string `form:"type"`                                                      // 通知类型过滤
+	Priority string `form:"priority" binding:"omitempty,oneof=low normal high urgent"` // 优先级过滤
 }
 
 // CreateNotificationRequest 创建通知请求（管理员使用）
 type CreateNotificationRequest struct {
-	RecipientIDs []string `json:"recipient_ids" binding:"required"`
-	Type         string   `json:"type" binding:"required"`
-	Title        string   `json:"title" binding:"required"`
-	Content      string   `json:"content" binding:"required"`
+	RecipientIDs []string `json:"recipient_ids" binding:"required,min=1,dive,required"`
+	Type         string   `json:"type" binding:"required,min=1,max=50"`
+	Title        string   `json:"title" binding:"required,min=1,max=200"`
+	Content      string   `json:"content" binding:"required,min=1,max=1000"`
 	Priority     string   `json:"priority" binding:"omitempty,oneof=low normal high urgent"`
 	ExpiresAt    uint64   `json:"expires_at"` // 过期时间，0表示不过期
 }
 
 // MarkNotificationRequest 标记通知请求
 type MarkNotificationRequest struct {
-	NotificationIDs []string `json:"notification_ids" binding:"required"`
+	NotificationIDs []string `json:"notification_ids" binding:"required,min=1,dive,required"`
 	Status          string   `json:"status" binding:"required,oneof=read unread"`
 }
 
@@ -51,8 +51,8 @@ type NotificationPreferencesRequest struct {
 	EnabledTypes       []string `json:"enabled_types"`
 	QuietHours         struct {
 		Enabled   bool   `json:"enabled"`
-		StartTime string `json:"start_time"` // HH:MM 格式
-		EndTime   string `json:"end_time"`   // HH:MM 格式
+		StartTime string `json:"start_time" binding:"omitempty,datetime=15:04"` // HH:MM 格式
+		EndTime   string `json:"end_time" binding:"omitempty,datetime=15:04"`   // HH:MM 格式
 	} `json:"quiet_hours"`
 }
 
@@ -71,11 +71,11 @@ type NotificationPreferencesResponse struct {
 
 // BulkNotificationRequest 批量通知请求
 type BulkNotificationRequest struct {
-	UserRoles []string `json:"user_roles"` // 按角色发送
-	UserIDs   []string `json:"user_ids"`   // 指定用户ID
-	Type      string   `json:"type" binding:"required"`
-	Title     string   `json:"title" binding:"required"`
-	Content   string   `json:"content" binding:"required"`
+	UserRoles []string `json:"user_roles" binding:"omitempty,dive,oneof=super_admin sec_mgr dev auditor"` // 按角色发送
+	UserIDs   []string `json:"user_ids" binding:"omitempty,dive,required"`                                // 指定用户ID
+	Type      string   `json:"type" binding:"required,min=1,max=50"`
+	Title     string   `json:"title" binding:"required,min=1,max=200"`
+	Content   string   `json:"content" binding:"required,min=1,max=1000"`
 	Priority  string   `json:"priority" binding:"omitempty,oneof=low normal high urgent"`
 	ExpiresAt uint64   `json:"expires_at"`
 }

@@ -7,28 +7,28 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/permission"
-
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	"github.com/gin-gonic/gin"
 )
 
 // PermissionRequest 权限请求结构
 type PermissionRequest struct {
-	Role     string `json:"role" binding:"required"`
-	Resource string `json:"resource" binding:"required"`
-	Action   string `json:"action" binding:"required"`
+	Role     string `json:"role" binding:"required,min=1,max=50"`
+	Resource string `json:"resource" binding:"required,min=1,max=50"`
+	Action   string `json:"action" binding:"required,min=1,max=50"`
 }
 
 // RoleRequest 角色请求结构
 type RoleRequest struct {
 	User string `json:"user" binding:"required"`
-	Role string `json:"role" binding:"required"`
+	Role string `json:"role" binding:"required,oneof=super_admin sec_mgr dev auditor"`
 }
 
 // CheckPermission 检查权限
 func CheckPermission(c *gin.Context) {
 	var req PermissionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -57,7 +57,7 @@ func CheckPermission(c *gin.Context) {
 func AddPolicy(c *gin.Context) {
 	var req PermissionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -83,7 +83,7 @@ func AddPolicy(c *gin.Context) {
 func RemovePolicy(c *gin.Context) {
 	var req PermissionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -122,7 +122,7 @@ func GetPolicies(c *gin.Context) {
 func AddRoleForUser(c *gin.Context) {
 	var req RoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -153,7 +153,7 @@ func AddRoleForUser(c *gin.Context) {
 func DeleteRoleForUser(c *gin.Context) {
 	var req RoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -264,7 +264,7 @@ func UpdateRolePermissions(c *gin.Context) {
 
 	var req UpdateRolePermissionsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -301,7 +301,7 @@ type MenuItemResponse struct {
 
 // BatchCheckPermissionsRequest 批量权限检查请求
 type BatchCheckPermissionsRequest struct {
-	Permissions []PermissionRequest `json:"permissions" binding:"required"`
+	Permissions []PermissionRequest `json:"permissions" binding:"required,min=1,dive"`
 }
 
 // BatchCheckPermissionsResponse 批量权限检查响应
@@ -389,7 +389,7 @@ func GetUserAllPermissions(c *gin.Context) {
 func BatchCheckPermissions(c *gin.Context) {
 	var req BatchCheckPermissionsRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 

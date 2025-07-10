@@ -6,6 +6,7 @@ import (
 	"github.com/akinoccc/hysaif/api/models"
 	"github.com/akinoccc/hysaif/api/packages/context"
 	"github.com/akinoccc/hysaif/api/packages/query"
+	"github.com/akinoccc/hysaif/api/packages/validation"
 	"github.com/akinoccc/hysaif/api/types"
 
 	"github.com/gin-gonic/gin"
@@ -80,7 +81,7 @@ func CreateUser(c *gin.Context) {
 	// 解析请求
 	var req types.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误: " + err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -137,7 +138,7 @@ func UpdateProfile(c *gin.Context) {
 
 	var req types.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误"})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
@@ -170,7 +171,7 @@ func UpdateUser(c *gin.Context) {
 	// 解析请求
 	var req types.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "请求参数错误: " + err.Error()})
+		validation.HandleValidationErrors(c, err)
 		return
 	}
 
