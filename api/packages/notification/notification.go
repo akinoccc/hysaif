@@ -154,45 +154,13 @@ func NotifyAccessRequestCreated(accessRequest *models.AccessRequest) error {
 		}
 	}
 
-	err = SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "敏感信息审批申请",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "申请人",
-					"value":   data.ApplicantName,
-				},
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-				map[string]interface{}{
-					"keyname": "申请理由",
-					"value":   data.Reason,
-				},
-			},
-			"jump_list": []map[string]interface{}{
-				{
-					"type":  1,
-					"url":   "https://hysaif.akino.icu/access_requests?id=" + accessRequest.ID,
-					"title": "查看申请",
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/access_requests?id=" + accessRequest.ID,
-			},
-		},
-	})
+	err = SendAccessRequestNotification(
+		"敏感信息审批申请",
+		data.ApplicantName,
+		data.SecretItemName,
+		data.Reason,
+		accessRequest.ID,
+	)
 
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
@@ -214,49 +182,14 @@ func NotifyAccessRequestApproved(accessRequest *models.AccessRequest) error {
 		ValidUntil:     validUntil,
 	}
 
-	err := SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "敏感信息审批申请已批准",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "审批人",
-					"value":   data.ApproverName,
-				},
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-				map[string]interface{}{
-					"keyname": "有效期至",
-					"value":   data.ValidUntil,
-				},
-				map[string]interface{}{
-					"keyname": "备注",
-					"value":   accessRequest.Note,
-				},
-			},
-			"jump_list": []map[string]interface{}{
-				{
-					"type":  1,
-					"url":   "https://hysaif.akino.icu/" + accessRequest.SecretItem.Type + "?id=" + accessRequest.SecretItemID,
-					"title": "查看密钥项",
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/" + accessRequest.SecretItem.Type + "?id=" + accessRequest.SecretItemID,
-			},
-		},
-	})
+	err := SendAccessApprovedNotification(
+		data.ApproverName,
+		data.SecretItemName,
+		data.ValidUntil,
+		accessRequest.Note,
+		accessRequest.SecretItemID,
+		accessRequest.SecretItem.Type,
+	)
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
 	}
@@ -281,38 +214,12 @@ func NotifyAccessRequestRejected(accessRequest *models.AccessRequest) error {
 		RejectReason:   accessRequest.RejectReason,
 	}
 
-	err := SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "敏感信息审批申请已拒绝",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "审批人",
-					"value":   accessRequest.Approver.Name,
-				},
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-				map[string]interface{}{
-					"keyname": "拒绝原因",
-					"value":   data.RejectReason,
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/access_requests?id=" + accessRequest.ID,
-			},
-		},
-	})
+	err := SendAccessRejectedNotification(
+		accessRequest.Approver.Name,
+		data.SecretItemName,
+		data.RejectReason,
+		accessRequest.ID,
+	)
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
 	}
@@ -336,38 +243,12 @@ func NotifyAccessRequestRevoked(accessRequest *models.AccessRequest) error {
 		SecretItemName: accessRequest.SecretItem.Name,
 	}
 
-	err := SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "敏感信息审批申请已作废",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "操作人",
-					"value":   accessRequest.Approver.Name,
-				},
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-				map[string]interface{}{
-					"keyname": "作废原因",
-					"value":   accessRequest.RejectReason,
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/access_requests?id=" + accessRequest.ID,
-			},
-		},
-	})
+	err := SendAccessRevokedNotification(
+		accessRequest.Approver.Name,
+		data.SecretItemName,
+		accessRequest.RejectReason,
+		accessRequest.ID,
+	)
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
 	}
@@ -390,30 +271,10 @@ func NotifyAccessRequestExpired(accessRequest *models.AccessRequest) error {
 		SecretItemName: accessRequest.SecretItem.Name,
 	}
 
-	err := SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "敏感信息审批申请已过期",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/access_requests?id=" + accessRequest.ID,
-			},
-		},
-	})
+	err := SendAccessExpiredNotification(
+		data.SecretItemName,
+		accessRequest.ID,
+	)
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
 	}
@@ -454,34 +315,12 @@ func NotifySecretItemExpiring(secretItem *models.SecretItem, expiresIn string) e
 		}
 	}
 
-	err = SendWeComMessage(map[string]interface{}{
-		"msgtype": "template_card",
-		"template_card": map[string]interface{}{
-			"card_type": "text_notice",
-			"source": map[string]interface{}{
-				"icon_url":   "https://hysaif.akino.icu/logo.png",
-				"desc":       "Hysaif",
-				"desc_color": 0,
-			},
-			"main_title": map[string]interface{}{
-				"title": "密钥项即将过期",
-			},
-			"horizontal_content_list": []interface{}{
-				map[string]interface{}{
-					"keyname": "密钥项",
-					"value":   data.SecretItemName,
-				},
-				map[string]interface{}{
-					"keyname": "过期时间",
-					"value":   data.ExpiresIn,
-				},
-			},
-			"card_action": map[string]interface{}{
-				"type": 1,
-				"url":  "https://hysaif.akino.icu/" + secretItem.Type + "?id=" + secretItem.ID,
-			},
-		},
-	})
+	err = SendSecretItemExpiringNotification(
+		data.SecretItemName,
+		data.ExpiresIn,
+		secretItem.ID,
+		secretItem.Type,
+	)
 	if err != nil {
 		return fmt.Errorf("发送企业微信消息失败: %v", err)
 	}

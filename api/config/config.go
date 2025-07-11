@@ -44,8 +44,9 @@ type WebAuthnConfig struct {
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Port int    `json:"port"`
-	Host string `json:"host"`
+	Domain string `json:"domain"`
+	Port   int    `json:"port"`
+	Host   string `json:"host"`
 }
 
 // VaultConfig Vault配置
@@ -171,6 +172,31 @@ func loadFromEnv() {
 
 	if vaultClientKey := os.Getenv("SIMS_VAULT_CLIENT_KEY"); vaultClientKey != "" {
 		AppConfig.Security.Vault.TLSConfig.ClientKey = vaultClientKey
+	}
+
+	// 企微
+	if wecomEnabled := os.Getenv("SIMS_WECOM_ENABLED"); wecomEnabled != "" {
+		AppConfig.WeCom.Enabled = wecomEnabled == "true"
+	}
+
+	if wecomCorpID := os.Getenv("SIMS_WECOM_CORP_ID"); wecomCorpID != "" {
+		AppConfig.WeCom.CorpID = wecomCorpID
+	}
+
+	if wecomAgentID := os.Getenv("SIMS_WECOM_AGENT_ID"); wecomAgentID != "" {
+		AppConfig.WeCom.AgentID = wecomAgentID
+	}
+
+	if wecomSecret := os.Getenv("SIMS_WECOM_SECRET"); wecomSecret != "" {
+		AppConfig.WeCom.Secret = wecomSecret
+	}
+
+	if wecomRedirectURI := os.Getenv("SIMS_WECOM_REDIRECT_URI"); wecomRedirectURI != "" {
+		AppConfig.WeCom.RedirectURI = wecomRedirectURI
+	}
+
+	if wecomRobotHookKey := os.Getenv("SIMS_WECOM_ROBOT_HOOK_KEY"); wecomRobotHookKey != "" {
+		AppConfig.WeCom.RobotHookKey = wecomRobotHookKey
 	}
 }
 
