@@ -49,6 +49,8 @@ func CreateAccessRequest(c *gin.Context) {
 		return
 	}
 
+	log.Println("user id", user.ID)
+
 	// 创建申请
 	accessRequest := models.AccessRequest{
 		SecretItemID: req.SecretItemID,
@@ -185,6 +187,12 @@ func RevokeAccessRequest(c *gin.Context) {
 
 	if err := models.DB.Save(&accessRequest).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "作废失败"})
+		return
+	}
+
+	// 发送通知
+	if err := notification.NotifyAccessRequestRevoked(&accessRequest); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "发送通知失败: " + err.Error()})
 		return
 	}
 

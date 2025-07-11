@@ -1,6 +1,8 @@
 package notification
 
 import (
+	"log"
+
 	appConfig "github.com/akinoccc/hysaif/api/config"
 	"github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
@@ -35,9 +37,10 @@ func SendWeComMessage(msgBody interface{}) error {
 	// 	},
 	// })
 
-	_, err := wc.GetRobot().RobotBroadcast(
+	info, err := wc.GetRobot().RobotBroadcast(
 		appConfig.AppConfig.WeCom.RobotHookKey,
 		msgBody,
 	)
+	log.Println("wecom:===============", info.ErrMsg)
 	return err
 }

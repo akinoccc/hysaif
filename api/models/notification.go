@@ -13,6 +13,7 @@ const (
 	NotificationTypeAccessRequestApproved = "access_request_approved" // 申请已批准
 	NotificationTypeAccessRequestRejected = "access_request_rejected" // 申请已拒绝
 	NotificationTypeAccessRequestExpired  = "access_request_expired"  // 申请已过期
+	NotificationTypeAccessRequestRevoked  = "access_request_revoked"  // 申请已作废
 	NotificationTypeSecretItemExpiring    = "secret_item_expiring"    // 密钥项即将过期
 	NotificationTypeSecretItemExpired     = "secret_item_expired"     // 密钥项已过期
 	NotificationTypeSystemMaintenance     = "system_maintenance"      // 系统维护通知
