@@ -8,7 +8,7 @@ type PostItemRequest struct {
 	Type        string                `json:"type" binding:"required,oneof=password api_key access_key ssh_key certificate token kv"` // password, api_key, access_key, ssh_key, certificate, token, kv
 	Description string                `json:"description,omitempty" binding:"max=500"`
 	Category    string                `json:"category" binding:"required,min=1,max=50"`
-	Environment string                `json:"environment" binding:"required,oneof=dev staging prod test"`
+	Environment string                `json:"environment" binding:"required,oneof=development test production staging local"`
 	Tags        []string              `json:"tags,omitempty" gorm:"type:text;serializer:json"`
 	Data        models.SecretItemData `json:"data" binding:"required" gorm:"type:text;serializer:json"`
 	ExpiresAt   uint64                `json:"expires_at,omitempty"`

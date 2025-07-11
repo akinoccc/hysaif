@@ -164,9 +164,11 @@ const quickFilters = computed((): FilterField[] => [
     type: 'select',
     placeholder: '全部环境',
     options: [
-      { value: 'prod', label: '生产环境' },
+      { value: 'production', label: '生产环境' },
+      { value: 'staging', label: '预发环境' },
       { value: 'test', label: '测试环境' },
-      { value: 'dev', label: '开发环境' },
+      { value: 'development', label: '开发环境' },
+      { value: 'local', label: '本地环境' },
     ],
   },
 ])

@@ -149,11 +149,17 @@ const availableGroups = computed(() => {
             <SelectItem value="production">
               生产环境
             </SelectItem>
+            <SelectItem value="staging">
+              预发环境
+            </SelectItem>
             <SelectItem value="test">
               测试环境
             </SelectItem>
-            <SelectItem value="dev">
+            <SelectItem value="development">
               开发环境
+            </SelectItem>
+            <SelectItem value="local">
+              本地环境
             </SelectItem>
           </SelectContent>
         </Select>
