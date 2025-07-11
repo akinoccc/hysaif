@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig `json:"database"`
 	Security SecurityConfig `json:"security"`
 	Server   ServerConfig   `json:"server"`
+	WeCom    WeComConfig    `json:"wecom"`
 }
 
 // DatabaseConfig 数据库配置
@@ -64,6 +65,16 @@ type VaultTLSConfig struct {
 	CACert     string `json:"ca_cert"`     // CA证书路径
 	ClientCert string `json:"client_cert"` // 客户端证书路径
 	ClientKey  string `json:"client_key"`  // 客户端私钥路径
+}
+
+// WeComConfig 企业微信配置
+type WeComConfig struct {
+	Enabled      bool   `json:"enabled"`        // 是否启用企业微信通知
+	CorpID       string `json:"corp_id"`        // 企业ID
+	AgentID      string `json:"agent_id"`       // 应用ID
+	Secret       string `json:"secret"`         // 应用密钥
+	RedirectURI  string `json:"redirect_uri"`   // 回调URL
+	RobotHookKey string `json:"robot_hook_key"` // 企微机器人 webhook key
 }
 
 // AppConfig 全局配置实例

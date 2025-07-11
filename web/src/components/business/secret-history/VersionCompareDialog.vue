@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { VersionComparisonResponse } from '@/api/types'
-import { GitCompare, Loader2, X } from 'lucide-vue-next'
+import { GitCompare, Loader2 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { secretItemAPI } from '@/api/secret'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,

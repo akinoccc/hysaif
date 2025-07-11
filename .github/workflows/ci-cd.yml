@@ -293,6 +293,14 @@ jobs:
                 "rp_id": "hysaif.akino.icu",
                 "rp_origins": ["https://hysaif.akino.icu"]
               }
+            },
+            "wecom": {
+              "enabled": true,
+              "corp_id": "${{ secrets.WE_COM_CORP_ID }}",
+              "agent_id": "${{ secrets.WE_COM_AGENT_ID }}",
+              "secret": "${{ secrets.WE_COM_SECRET }}",
+              "redirect_uri": "${{ secrets.WE_COM_REDIRECT_URI }}",
+              "robot_hook_key": "${{ secrets.WE_COM_ROBOT_HOOK_KEY }}"
             }
           }
           EOF

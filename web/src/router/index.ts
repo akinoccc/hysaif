@@ -1,6 +1,5 @@
 import { Bell, FileText, LayoutDashboard, Shield, UserCheck, Users } from 'lucide-vue-next'
 import { createRouter, createWebHistory } from 'vue-router'
-import { SECRET_ITEM_TYPE, SECRET_ITEM_TYPE_MAP } from '@/constants'
 import { useAuthStore } from '@/stores/auth'
 
 export const menuRoutes = [
