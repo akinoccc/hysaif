@@ -64,6 +64,12 @@ func InitRouter(r *gin.Engine) {
 				items.PUT("/:id", middleware.RequirePermission("secret", "update"), handlers.UpdateSecretItem)
 				items.DELETE("/:id", middleware.RequirePermission("secret", "delete"), handlers.DeleteSecretItem)
 
+				// 版本历史管理
+				items.GET("/:id/history", middleware.RequirePermission("secret", "read"), handlers.GetSecretItemHistory)
+				items.GET("/:id/history/:version", middleware.RequirePermission("secret", "read"), handlers.GetSecretItemHistoryByVersion)
+				items.POST("/:id/restore", middleware.RequirePermission("secret", "update"), handlers.RestoreSecretItemFromHistory)
+				items.POST("/:id/compare", middleware.RequirePermission("secret", "read"), handlers.CompareSecretItemVersions)
+
 				// 通过申请访问密钥项（所有用户都可以使用）
 				items.GET("/:id/access",
 					middleware.AuditLog(types.AuditLogActionAccess, types.AuditLogResourceCustom),

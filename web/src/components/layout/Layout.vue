@@ -28,10 +28,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { useTheme } from '@/composables/useTheme'
+import { menuRoutes } from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import NavUser from './NavUser.vue'
 
@@ -142,22 +144,26 @@ watch(() => authStore.isAuthenticated, () => {
       <!-- 导航菜单 -->
       <SidebarContent class="px-2 py-4">
         <SidebarMenu>
-          <SidebarMenuItem
-            v-for="item in menuItems" :key="item.path"
-          >
-            <SidebarMenuSkeleton />
-            <SidebarMenuButton
-              class="h-fit py-0 theme-transition"
-              :is-active="isMenuActive(item.path, route.path)"
+          <div v-if="loading" class="px-2 space-y-2">
+            <SidebarMenuSkeleton v-for="item in menuRoutes" :key="item.path" />
+          </div>
+          <template v-else>
+            <SidebarMenuItem
+              v-for="item in menuItems" :key="item.path"
             >
-              <RouterLink :to="item.path" class="w-full">
-                <div class="flex items-center gap-2 px-4 py-2.5">
-                  <component :is="getIconComponent(item.icon)" class="h-4 w-4" />
-                  <span>{{ item.title }}</span>
-                </div>
-              </RouterLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+              <SidebarMenuButton
+                class="h-fit py-0 theme-transition"
+                :is-active="isMenuActive(item.path, route.path)"
+              >
+                <RouterLink :to="item.path" class="w-full">
+                  <div class="flex items-center gap-2 px-4 py-2.5">
+                    <component :is="getIconComponent(item.icon)" class="h-4 w-4" />
+                    <span>{{ item.title }}</span>
+                  </div>
+                </RouterLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </template>
         </SidebarMenu>
       </SidebarContent>
 

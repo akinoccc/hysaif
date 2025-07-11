@@ -1,9 +1,13 @@
 import type {
   ApiListResponse,
   ApiMethod,
+  CompareVersionsRequest,
   ItemsListParams,
   PostItemRequest,
+  RestoreSecretItemFromHistoryRequest,
   SecretItem,
+  SecretItemHistory,
+  VersionComparisonResponse,
 } from './types'
 import { api } from './http'
 
@@ -73,5 +77,45 @@ export const secretItemAPI = {
    */
   getAccessedItems: (params?: ItemsListParams): ApiMethod<ApiListResponse<SecretItem>> => {
     return api.get('/items/accessed', { params })
+  },
+
+  /**
+   * 获取信息项历史版本列表
+   * @param id 信息项ID
+   * @param params 查询参数，包括分页等
+   * @returns 历史版本列表响应
+   */
+  getItemHistory: (id: string | number, params?: { page?: number, page_size?: number }): ApiMethod<ApiListResponse<SecretItemHistory>> => {
+    return api.get(`/items/${id}/history`, { params })
+  },
+
+  /**
+   * 获取指定版本的信息项历史记录
+   * @param id 信息项ID
+   * @param version 版本号
+   * @returns 历史版本详情
+   */
+  getItemHistoryByVersion: (id: string | number, version: number): ApiMethod<SecretItemHistory> => {
+    return api.get(`/items/${id}/history/${version}`)
+  },
+
+  /**
+   * 从历史版本恢复信息项
+   * @param id 信息项ID
+   * @param data 恢复数据
+   * @returns 恢复后的信息项
+   */
+  restoreItemFromHistory: (id: string | number, data: RestoreSecretItemFromHistoryRequest): ApiMethod<SecretItem> => {
+    return api.post(`/items/${id}/restore`, data)
+  },
+
+  /**
+   * 比较两个版本的差异
+   * @param id 信息项ID
+   * @param data 比较数据
+   * @returns 版本比较结果
+   */
+  compareVersions: (id: string | number, data: CompareVersionsRequest): ApiMethod<VersionComparisonResponse> => {
+    return api.post(`/items/${id}/compare`, data)
   },
 }

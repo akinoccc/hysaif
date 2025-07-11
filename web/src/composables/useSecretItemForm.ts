@@ -130,8 +130,8 @@ export function useSecretItemForm(itemType: string) {
     z.object({
       name: z.string().min(1, '请输入名称'),
       description: z.string().optional(),
-      category: z.string().optional(),
-      environment: z.string().optional(),
+      category: z.string(),
+      environment: z.string(),
       tags: z.array(z.string()).optional(),
       expires_at: z.number().optional(),
       data: dataSchema,

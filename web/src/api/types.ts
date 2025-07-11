@@ -172,6 +172,12 @@ export interface SecretItem<D = any> extends SecretBaseInfo {
   created_by: string
   updated_by: string
 
+  // 版本控制相关
+  version: number
+  has_history: boolean
+  history_count: number
+  last_modified_at: number
+
   // 访问权限相关
   has_approved_access?: boolean // 是否有已批准的访问申请
 
@@ -182,7 +188,7 @@ export interface SecretItem<D = any> extends SecretBaseInfo {
 
 export type PostItemRequest<D> = Omit<
   SecretItem<D>,
-  'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'creator' | 'updater'
+  'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'creator' | 'updater' | 'version' | 'has_history' | 'history_count' | 'last_modified_at'
 >
 
 export interface ItemsListParams extends PaginationParams {
@@ -267,6 +273,45 @@ export interface AccessRequestListParams extends PaginationParams {
   created_at_to?: string
   page?: number
   page_size?: number
+}
+
+// 版本历史相关类型
+export interface SecretItemHistory {
+  id: string
+  secret_item_id: string
+  version: number
+  name: string
+  description: string
+  type: string
+  category: string
+  tags: string[]
+  data: SecretItemData
+  expires_at: number
+  environment: string
+  change_type: string // created, updated, deleted
+  change_reason: string
+  created_at: number
+  created_by_id: string
+
+  // 关联字段
+  secret_item?: SecretItem
+  created_by?: User
+}
+
+export interface RestoreSecretItemFromHistoryRequest {
+  version: number
+  reason?: string
+}
+
+export interface CompareVersionsRequest {
+  version1: number
+  version2: number
+}
+
+export interface VersionComparisonResponse {
+  version1: number
+  version2: number
+  changes: Record<string, any>
 }
 
 // API 方法返回类型

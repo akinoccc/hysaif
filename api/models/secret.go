@@ -25,6 +25,12 @@ type SecretItem struct {
 	CreatedByID string          `json:"-" gorm:"index"`              // 创建者ID
 	UpdatedByID string          `json:"-" gorm:"index"`              // 更新者ID
 
+	// 版本控制字段
+	Version        int    `json:"version" gorm:"default:1"`                     // 当前版本号
+	HasHistory     bool   `json:"has_history" gorm:"-"`                         // 是否有历史版本（不存储在数据库中）
+	HistoryCount   int    `json:"history_count" gorm:"-"`                       // 历史版本数量（不存储在数据库中）
+	LastModifiedAt uint64 `json:"last_modified_at" gorm:"autoUpdateTime:milli"` // 最后修改时间
+
 	// 访问权限相关（不存储在数据库中）
 	HasApprovedAccess bool `json:"has_approved_access" gorm:"-"` // 是否有已批准的访问申请
 
@@ -36,7 +42,29 @@ type SecretItem struct {
 // BeforeCreate 钩子函数，在创建记录之前设置ID
 func (si *SecretItem) BeforeCreate(tx *gorm.DB) (err error) {
 	si.ID = uuid.New().String()
+	// 初始化版本号
+	if si.Version == 0 {
+		si.Version = 1
+	}
 	return
+}
+
+// CreateHistory 创建历史版本记录
+func (si *SecretItem) CreateHistory(changeType, reason, createdByID string) error {
+	return CreateSecretItemHistory(si, changeType, reason, createdByID)
+}
+
+// LoadHistoryInfo 加载历史信息
+func (si *SecretItem) LoadHistoryInfo() error {
+	var count int64
+	err := DB.Model(&SecretItemHistory{}).Where("secret_item_id = ?", si.ID).Count(&count).Error
+	if err != nil {
+		return err
+	}
+
+	si.HistoryCount = int(count)
+	si.HasHistory = count > 0
+	return nil
 }
 
 // SecretItemData 敏感信息数据结构（用于前端展示，不包含加密数据）

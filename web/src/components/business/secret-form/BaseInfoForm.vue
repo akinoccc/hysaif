@@ -100,7 +100,9 @@ const availableGroups = computed(() => {
     <!-- 分类 -->
     <FormField v-slot="{ componentField }" name="category">
       <FormItem>
-        <FormLabel>分类</FormLabel>
+        <FormLabel>
+          <span class="text-red-500">*</span>分类
+        </FormLabel>
         <FormControl>
           <Select v-bind="componentField">
             <SelectTrigger>
@@ -134,7 +136,9 @@ const availableGroups = computed(() => {
     <!-- 环境 -->
     <FormField v-slot="{ componentField }" name="environment">
       <FormItem>
-        <FormLabel>环境</FormLabel>
+        <FormLabel>
+          <span class="text-red-500">*</span>环境
+        </FormLabel>
       </FormItem>
       <FormControl>
         <Select v-bind="componentField">

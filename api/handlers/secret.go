@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -58,11 +59,15 @@ func GetSecretItems(c *gin.Context) {
 			// 设置每个密钥项的访问权限标志
 			for i := range items {
 				items[i].HasApprovedAccess = accessMap[items[i].ID]
+				// 加载历史信息
+				items[i].LoadHistoryInfo()
 			}
 		} else {
 			// 查询失败时，默认设置为无访问权限
 			for i := range items {
 				items[i].HasApprovedAccess = false
+				// 加载历史信息
+				items[i].LoadHistoryInfo()
 			}
 		}
 	}
@@ -104,6 +109,9 @@ func CreateSecretItem(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "创建失败"})
 		return
 	}
+
+	// 创建初始历史版本
+	item.CreateHistory(models.HistoryChangeTypeCreated, "创建密钥项", user.ID)
 
 	// 重新查询以获取关联数据
 	models.DB.Preload("Creator").Preload("Updater").First(&item, "id = ?", item.ID)
@@ -150,6 +158,9 @@ func GetSecretItem(c *gin.Context) {
 		return
 	}
 
+	// 加载历史信息
+	item.LoadHistoryInfo()
+
 	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(item.Type))(c)
 
 	c.JSON(http.StatusOK, item)
@@ -183,12 +194,16 @@ func UpdateSecretItem(c *gin.Context) {
 	item.Data = &req.Data // 这里会触发自定义序列化器
 	item.ExpiresAt = req.ExpiresAt
 	item.UpdatedByID = user.ID
+	item.Version++ // 增加版本号
 
 	// 保存更新
 	if err := models.DB.Save(&item).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "更新失败"})
 		return
 	}
+
+	// 创建历史版本
+	item.CreateHistory(models.HistoryChangeTypeUpdated, "更新密钥项", user.ID)
 
 	// 重新查询以获取关联数据
 	models.DB.
@@ -204,12 +219,16 @@ func UpdateSecretItem(c *gin.Context) {
 // DeleteSecretItem 删除信息项
 func DeleteSecretItem(c *gin.Context) {
 	id := c.Param("id")
+	user := context.GetCurrentUser(c)
 
 	var item models.SecretItem
 	if err := models.DB.Where("id = ?", id).First(&item).Error; err != nil {
 		c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "信息项不存在"})
 		return
 	}
+
+	// 创建删除历史版本
+	item.CreateHistory(models.HistoryChangeTypeDeleted, "删除密钥项", user.ID)
 
 	if err := models.DB.Delete(&item).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "删除失败"})
@@ -261,5 +280,205 @@ func GetAccessedSecretItems(c *gin.Context) {
 			Total:      int(total),
 			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
 		},
+	})
+}
+
+// GetSecretItemHistory 获取信息项历史版本列表
+func GetSecretItemHistory(c *gin.Context) {
+	id := c.Param("id")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+
+	// 检查用户对该密钥项的访问权限
+	user := context.GetCurrentUser(c)
+	var item models.SecretItem
+	query := models.DB.Where("id = ?", id)
+
+	// 如果用户不是创建者，需要检查是否有访问权限
+	var approvedRequests []models.AccessRequest
+	now := uint64(time.Now().UnixMilli())
+	err := models.DB.Where(`secret_item_id = ? AND applicant_id = ? AND status = ? AND ? BETWEEN valid_from AND valid_until`,
+		id, user.ID, models.RequestStatusApproved, now).
+		Find(&approvedRequests).Error
+
+	if err == nil && len(approvedRequests) == 0 {
+		query = query.Where("created_by_id = ?", user.ID)
+	}
+
+	if err := query.First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusForbidden, types.ErrorResponse{Error: "你无法访问此信息项"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "信息项不存在"})
+		return
+	}
+
+	// 获取历史版本列表
+	histories, err := models.GetSecretItemHistory(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "获取历史版本失败"})
+		return
+	}
+
+	// 分页处理
+	total := len(histories)
+	start := (page - 1) * pageSize
+	end := start + pageSize
+
+	if start >= total {
+		histories = []models.SecretItemHistory{}
+	} else {
+		if end > total {
+			end = total
+		}
+		histories = histories[start:end]
+	}
+
+	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(item.Type))(c)
+
+	c.JSON(http.StatusOK, types.ListResponse[models.SecretItemHistory]{
+		Data: histories,
+		Pagination: types.Pagination{
+			Page:       page,
+			PageSize:   pageSize,
+			Total:      total,
+			TotalPages: int(math.Ceil(float64(total) / float64(pageSize))),
+		},
+	})
+}
+
+// GetSecretItemHistoryByVersion 获取指定版本的信息项历史记录
+func GetSecretItemHistoryByVersion(c *gin.Context) {
+	id := c.Param("id")
+	version, err := strconv.Atoi(c.Param("version"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, types.ErrorResponse{Error: "版本号格式错误"})
+		return
+	}
+
+	// 检查用户对该密钥项的访问权限
+	user := context.GetCurrentUser(c)
+	var item models.SecretItem
+	query := models.DB.Where("id = ?", id)
+
+	// 如果用户不是创建者，需要检查是否有访问权限
+	var approvedRequests []models.AccessRequest
+	now := uint64(time.Now().UnixMilli())
+	err = models.DB.Where(`secret_item_id = ? AND applicant_id = ? AND status = ? AND ? BETWEEN valid_from AND valid_until`,
+		id, user.ID, models.RequestStatusApproved, now).
+		Find(&approvedRequests).Error
+
+	if err == nil && len(approvedRequests) == 0 {
+		query = query.Where("created_by_id = ?", user.ID)
+	}
+
+	if err := query.First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusForbidden, types.ErrorResponse{Error: "你无法访问此信息项"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "信息项不存在"})
+		return
+	}
+
+	// 获取指定版本的历史记录
+	history, err := models.GetSecretItemHistoryByVersion(id, version)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, types.ErrorResponse{Error: "历史版本不存在"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "获取历史版本失败"})
+		return
+	}
+
+	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(item.Type))(c)
+
+	c.JSON(http.StatusOK, history)
+}
+
+// RestoreSecretItemFromHistory 从历史版本恢复信息项
+func RestoreSecretItemFromHistory(c *gin.Context) {
+	id := c.Param("id")
+	user := context.GetCurrentUser(c)
+
+	var req types.RestoreSecretItemFromHistoryRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validation.HandleValidationErrors(c, err)
+		return
+	}
+
+	// 检查用户对该密钥项的访问权限（只有创建者才能恢复）
+	var item models.SecretItem
+	if err := models.DB.Where("id = ? AND created_by_id = ?", id, user.ID).First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusForbidden, types.ErrorResponse{Error: "你无法恢复此信息项"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "信息项不存在"})
+		return
+	}
+
+	// 恢复历史版本
+	restoredItem, err := models.RestoreSecretItemFromHistory(id, req.Version, user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: fmt.Sprintf("恢复失败: %v", err)})
+		return
+	}
+
+	middleware.AuditLog(types.AuditLogActionUpdate, middleware.GetSecretResourceType(item.Type))(c)
+
+	c.JSON(http.StatusOK, restoredItem)
+}
+
+// CompareSecretItemVersions 比较两个版本的差异
+func CompareSecretItemVersions(c *gin.Context) {
+	id := c.Param("id")
+	user := context.GetCurrentUser(c)
+
+	var req types.CompareVersionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		validation.HandleValidationErrors(c, err)
+		return
+	}
+
+	// 检查用户对该密钥项的访问权限
+	var item models.SecretItem
+	query := models.DB.Where("id = ?", id)
+
+	// 如果用户不是创建者，需要检查是否有访问权限
+	var approvedRequests []models.AccessRequest
+	now := uint64(time.Now().UnixMilli())
+	err := models.DB.Where(`secret_item_id = ? AND applicant_id = ? AND status = ? AND ? BETWEEN valid_from AND valid_until`,
+		id, user.ID, models.RequestStatusApproved, now).
+		Find(&approvedRequests).Error
+
+	if err == nil && len(approvedRequests) == 0 {
+		query = query.Where("created_by_id = ?", user.ID)
+	}
+
+	if err := query.First(&item).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusForbidden, types.ErrorResponse{Error: "你无法访问此信息项"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: "信息项不存在"})
+		return
+	}
+
+	// 比较版本差异
+	changes, err := models.CompareSecretItemVersions(id, req.Version1, req.Version2)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, types.ErrorResponse{Error: fmt.Sprintf("版本比较失败: %v", err)})
+		return
+	}
+
+	middleware.AuditLog(types.AuditLogActionRead, middleware.GetSecretResourceType(item.Type))(c)
+
+	c.JSON(http.StatusOK, types.VersionComparisonResponse{
+		Version1: req.Version1,
+		Version2: req.Version2,
+		Changes:  changes,
 	})
 }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SecretItem } from '@/api/types'
 import { Braces, Code2, Copy, Eye } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { toast } from 'vue-sonner'
@@ -8,26 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { copyToClipboard } from '@/lib/utils'
 
-const item = ref<SecretItem | null>(null)
 const isRawMode = ref(false)
 
-function handleLoadSuccess(loadedItem: SecretItem) {
-  item.value = loadedItem
-}
-
-function handleLoadError(error: any) {
-  console.error('加载 KV 键值对失败:', error)
-  item.value = null
-}
+const infoRef = ref<InstanceType<typeof SecretDetail>>()
 
 // 生成 JSON 格式的数据
 const jsonData = computed(() => {
-  if (!item.value?.data?.custom_data) {
+  if (!infoRef.value?.item?.data?.custom_data) {
     return {}
   }
 
   const result: Record<string, string> = {}
-  item.value.data.custom_data.forEach((entry: { key: string, value: string }) => {
+  infoRef.value?.item?.data?.custom_data.forEach((entry: { key: string, value: string }) => {
     result[entry.key] = entry.value
   })
 
@@ -59,7 +50,7 @@ async function copyJsonData() {
 <template>
   <SecretDetail
     title="KV 键值对详情" description="查看和管理 KV 键值对信息" secret-type="custom" secret-data-title="KV 键值对信息"
-    :secret-data-icon="Braces" error-text="KV 键值对信息" @load-success="handleLoadSuccess" @load-error="handleLoadError"
+    :secret-data-icon="Braces" error-text="KV 键值对信息"
   >
     <template #secret-actions>
       <!-- 切换视图模式按钮 -->
@@ -75,7 +66,7 @@ async function copyJsonData() {
       </Button>
     </template>
 
-    <template #secret-data>
+    <template #secret-data="{ item }">
       <!-- 正常视图 -->
       <div class="space-y-4">
         <!-- KV 键值对列表 -->

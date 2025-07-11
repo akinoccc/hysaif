@@ -363,10 +363,10 @@ func GetUserAllPermissions(c *gin.Context) {
 		{Role: user.Role, Resource: "notification", Action: "view_templates"},
 
 		// KV 键值对资源权限
-		{Role: user.Role, Resource: "custom", Action: "read"},
-		{Role: user.Role, Resource: "custom", Action: "create"},
-		{Role: user.Role, Resource: "custom", Action: "update"},
-		{Role: user.Role, Resource: "custom", Action: "delete"},
+		{Role: user.Role, Resource: "kv", Action: "read"},
+		{Role: user.Role, Resource: "kv", Action: "create"},
+		{Role: user.Role, Resource: "kv", Action: "update"},
+		{Role: user.Role, Resource: "kv", Action: "delete"},
 	}
 
 	// 批量检查权限
@@ -440,7 +440,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 		{Path: "/ssh_key", Title: "SSH密钥", Icon: "Terminal", Order: 8},
 		{Path: "/password", Title: "密码", Icon: "Lock", Order: 9},
 		{Path: "/token", Title: "令牌", Icon: "Coins", Order: 10},
-		{Path: "/custom", Title: "KV 键值对", Icon: "Braces", Order: 11},
+		{Path: "/kv", Title: "KV 键值对", Icon: "Braces", Order: 11},
 	}
 
 	// 定义菜单权限映射 - 移除静态角色列表，只保留资源和动作映射
@@ -458,7 +458,7 @@ func GetUserAccessibleMenus(c *gin.Context) {
 		"/ssh_key":         {resource: "secret", action: "read"},
 		"/password":        {resource: "secret", action: "read"},
 		"/token":           {resource: "secret", action: "read"},
-		"/custom":          {resource: "secret", action: "read"},
+		"/kv":              {resource: "secret", action: "read"},
 		"/notifications":   {resource: "notification", action: "read"},
 	}
 

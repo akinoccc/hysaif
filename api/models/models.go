@@ -49,7 +49,7 @@ func InitDB() {
 	}
 
 	// 自动迁移 - User 模型必须首先创建，因为其他模型都依赖于它
-	err = DB.AutoMigrate(&User{}, &SecretItem{}, &AccessRequest{}, &Notification{}, &WebAuthnCredential{}, &AuditLog{})
+	err = DB.AutoMigrate(&User{}, &SecretItem{}, &SecretItemHistory{}, &AccessRequest{}, &Notification{}, &WebAuthnCredential{}, &AuditLog{})
 	if err != nil {
 		panic("failed to migrate database")
 	}

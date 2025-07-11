@@ -1,28 +1,15 @@
 <script setup lang="ts">
-import type { SecretItem } from '@/api/types'
 import { Cloud } from 'lucide-vue-next'
-import { ref } from 'vue'
 import { SecretDetail, SecretInput } from '@/components'
 import { Label } from '@/components/ui/label'
-
-const item = ref<SecretItem | null>(null)
-
-function handleLoadSuccess(loadedItem: SecretItem) {
-  item.value = loadedItem
-}
-
-function handleLoadError(error: any) {
-  console.error('加载访问密钥失败:', error)
-  item.value = null
-}
 </script>
 
 <template>
   <SecretDetail
     title="访问密钥详情" description="查看和管理访问密钥信息" secret-type="access_key" secret-data-title="密钥信息"
-    :secret-data-icon="Cloud" error-text="访问密钥信息" @load-success="handleLoadSuccess" @load-error="handleLoadError"
+    :secret-data-icon="Cloud" error-text="访问密钥信息"
   >
-    <template #secret-data>
+    <template #secret-data="{ item }">
       <!-- Access Key -->
       <div class="space-y-2">
         <Label class="text-sm font-medium text-muted-foreground">Access Key</Label>

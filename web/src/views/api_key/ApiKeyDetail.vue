@@ -1,28 +1,15 @@
 <script setup lang="ts">
-import type { SecretItem } from '@/api/types'
 import { Key } from 'lucide-vue-next'
-import { ref } from 'vue'
 import { SecretDetail, SecretInput } from '@/components'
 import { Label } from '@/components/ui/label'
-
-const item = ref<SecretItem | null>(null)
-
-function handleLoadSuccess(loadedItem: SecretItem) {
-  item.value = loadedItem
-}
-
-function handleLoadError(error: any) {
-  console.error('加载API密钥失败:', error)
-  item.value = null
-}
 </script>
 
 <template>
   <SecretDetail
     title="API 密钥详情" description="查看和管理 API 密钥信息" secret-type="api_key" secret-data-title="密钥信息"
-    :secret-data-icon="Key" error-text="API 密钥信息" @load-success="handleLoadSuccess" @load-error="handleLoadError"
+    :secret-data-icon="Key" error-text="API 密钥信息"
   >
-    <template #secret-data>
+    <template #secret-data="{ item }">
       <div class="space-y-2">
         <Label class="text-sm font-medium text-muted-foreground">API 密钥</Label>
         <div class="mt-1">

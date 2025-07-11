@@ -1,29 +1,16 @@
 <script setup lang="ts">
-import type { SecretItem } from '@/api/types'
 import { User } from 'lucide-vue-next'
-import { ref } from 'vue'
 import { SecretDetail, SecretInput } from '@/components'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
-const item = ref<SecretItem | null>(null)
-
-function handleLoadSuccess(loadedItem: SecretItem) {
-  item.value = loadedItem
-}
-
-function handleLoadError(error: any) {
-  console.error('加载账号密码失败:', error)
-  item.value = null
-}
 </script>
 
 <template>
   <SecretDetail
     title="账号密码详情" description="查看和管理账号密码信息" secret-type="password" secret-data-title="账号信息"
-    :secret-data-icon="User" error-text="账号密码信息" @load-success="handleLoadSuccess" @load-error="handleLoadError"
+    :secret-data-icon="User" error-text="账号密码信息"
   >
-    <template #secret-data>
+    <template #secret-data="{ item }">
       <!-- 用户名 -->
       <div class="space-y-2">
         <Label class="text-sm font-medium text-muted-foreground">用户名</Label>
