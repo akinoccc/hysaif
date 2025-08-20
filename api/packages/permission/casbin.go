@@ -3,9 +3,9 @@ package permission
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 	"sync"
 
+	"github.com/akinoccc/hysaif/api/config"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
@@ -36,7 +36,7 @@ func GetCasbinManager(db *gorm.DB) *CasbinManager {
 // initCasbin 初始化Casbin
 func (cm *CasbinManager) initCasbin() {
 	// 获取模型文件路径
-	modelPath := filepath.Join(".", "rbac_model.conf")
+	modelPath := config.AppConfig.RBACConfig
 
 	// 创建GORM适配器
 	adapter, err := gormadapter.NewAdapterByDB(cm.db)

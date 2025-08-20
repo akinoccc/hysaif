@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,8 +16,14 @@ import (
 )
 
 func main() {
+	// 定义命令行参数
+	var configPath string
+	flag.StringVar(&configPath, "config", "config.json", "配置文件路径")
+	flag.StringVar(&configPath, "c", "config.json", "配置文件路径 (简写)")
+	flag.Parse()
+
 	// 加载配置文件
-	if err := config.LoadConfig("config.json"); err != nil {
+	if err := config.LoadConfig(configPath); err != nil {
 		log.Fatalf("加载配置文件失败: %v", err)
 	}
 
@@ -46,5 +53,6 @@ func main() {
 	}
 
 	log.Printf("服务器启动在 %s:%d", host, port)
+	log.Printf("使用配置文件: %s", configPath)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), r))
 }

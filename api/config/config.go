@@ -3,16 +3,16 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 )
 
 // Config 应用配置结构
 type Config struct {
-	Database DatabaseConfig `json:"database"`
-	Security SecurityConfig `json:"security"`
-	Server   ServerConfig   `json:"server"`
-	WeCom    WeComConfig    `json:"wecom"`
+	Database   DatabaseConfig `json:"database"`
+	Security   SecurityConfig `json:"security"`
+	Server     ServerConfig   `json:"server"`
+	WeCom      WeComConfig    `json:"wecom"`
+	RBACConfig string         `json:"rbac_config"`
 }
 
 // DatabaseConfig 数据库配置
@@ -83,21 +83,21 @@ var AppConfig *Config
 
 // LoadConfig 加载配置文件
 func LoadConfig(configPath string) error {
-	// 如果配置文件不存在，创建默认配置
+	// 检查配置文件是否存在
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatal("未找到配置文件")
+		return fmt.Errorf("配置文件不存在: %s", configPath)
 	}
 
 	// 读取配置文件
 	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return fmt.Errorf("读取配置文件失败: %v", err)
+		return fmt.Errorf("读取配置文件失败 %s: %v", configPath, err)
 	}
 
 	// 解析配置
 	AppConfig = &Config{}
 	if err := json.Unmarshal(data, AppConfig); err != nil {
-		return fmt.Errorf("解析配置文件失败: %v", err)
+		return fmt.Errorf("解析配置文件失败 %s: %v", configPath, err)
 	}
 
 	// 从环境变量覆盖敏感配置
@@ -197,6 +197,10 @@ func loadFromEnv() {
 
 	if wecomRobotHookKey := os.Getenv("SIMS_WECOM_ROBOT_HOOK_KEY"); wecomRobotHookKey != "" {
 		AppConfig.WeCom.RobotHookKey = wecomRobotHookKey
+	}
+
+	if rbacConfig := os.Getenv("SIMS_RBAC_CONFIG"); rbacConfig != "" {
+		AppConfig.RBACConfig = rbacConfig
 	}
 }
 

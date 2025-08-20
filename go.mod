@@ -1,4 +1,4 @@
-module github.com/akinoccc/hysaif/api
+module github.com/akinoccc/hysaif
 
 go 1.24
 
